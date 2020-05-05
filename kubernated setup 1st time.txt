@@ -1,0 +1,349 @@
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+
+sudo apt-get update
+
+sudo apt-get install -y docker-ce=18.06.1~ce~3-0~ubuntu
+
+sudo apt-mark hold docker-ce
+
+
+
+
+
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
+cat << EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+deb https://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+
+sudo apt-get update
+
+sudo apt-get install -y kubelet=1.12.7-00 kubeadm=1.12.7-00 kubectl=1.12.7-00
+
+sudo apt-mark hold kubelet kubeadm kubectl
+
+
+bootstraping cluster
+Flannel for network setup
+
+
+kubectl create –f Tesing_for_Image_pull
+kubectl log Tesing_for_Image_pull
+kubectl create –f py.yaml
+kubectl describe jobs/py
+
+$ kubectl create –f namespace.yml ---------> 1
+$ kubectl get namespace -----------------> 2
+$ kubectl get namespace <Namespace name> ------->3
+$ kubectl describe namespace <Namespace name> ---->4
+$ kubectl delete namespace <Namespace name>
+
+ClusterIP --> within cluster
+NodePort  --> expose service to static IP and port
+Load Balancer
+
+> Replica Set ensures how many replica of pod should be running. It can be considered as a replacement of replication controller. The key difference between the replica set and the replication controller is, the replication controller only supports equality-based selector whereas the replica set supports set-based selector.
+
+> Deployments are upgraded and higher version of replication controller. They manage the deployment of replica sets which is also an upgraded version of the replication controller. They have the capability to update the replica set and are also capable of rolling back to the previous version.
+
+> kubectl create –f Deployment.yaml -–record
+
+> kubectl get deployments
+> kubectl rollout status deployment/Deployment
+> ubectl set image deployment/Deployment tomcat=tomcat:6.0
+> kubectl rollout undo deployment/Deployment –to-revision=2
+
+Pod -> PVC -> PV -> Host machine
+>  kubectl create –f local-01.yaml
+>  kubectl get pv
+>  kubectl get pvc
+>  kubectl describe pv pv0001
+
+
+```
+cat << EOF | kubectl create -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+EOF
+```
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-args-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox
+    command: ['echo']
+    args: ['This is my custom argument']
+  restartPolicy: Never
+  ```
+
+kubectl get pods
+kubectl describe pod nginx
+kubectl delete pod nginx
+
+
+```
+cat << EOF | kubectl create -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.15.4
+        ports:
+        - containerPort: 80
+EOF
+```
+
+```
+cat << EOF | kubectl create -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox
+spec:
+  containers:
+  - name: busybox
+    image: radial/busyboxplus:curl
+    args:
+    - sleep
+    - "1000"
+EOF
+```
+
+kubectl get deployments
+kubectl describe deployment nginx-deployment
+kubectl get pods -o wide
+kubectl exec busybox -- curl $nginx_pod_ip
+
+
+kubectl delete -f nginx.yaml -f redis.yaml
+kubectl replace -f nginx.yaml
+kubectl diff -f configs/  #what change will go on
+kubectl apply -f configs/
+
+kubectl diff -R -f configs/
+kubectl apply -R -f configs/
+
+// Get a list of system pods running in the cluster (namespace):
+kubectl get pods -n kube-system
+ESOps
+silos
+
+Types of service
+ - nodePort
+ - ClusterIP
+ - LoadBalancer
+
+```
+cat << EOF | kubectl create -f -
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30080  //You’ll be able to contact the NodePort Service, from outside the cluster, by requesting <NodeIP>:<NodePort>.,  a NodePort in the range of 30000 - 32767 and an internal cluster IP address is assigned to the service.
+  type: NodePort
+EOF
+```
+kubectl get svc
+
+
+kubectl create namespace robot-shop
+kubectl -n robot-shop create -f ~/robot-shop/K8s/descriptors/
+kubectl get pods -n robot-shop
+kubectl get pods -n robot-shop -w (w: to allow to watch changes to it, to know which parts are taking time to start)
+
+
+kubectl create ns my-ns
+kubectl get namespaces
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-ns-pod
+  namespace: my-ns     <---
+  labels:
+    app: myapp
+spec: ....
+```
+
+
+## Config map
+ConfigMap.yml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+     name: my-config-map
+  data:
+     myKey: myValue
+     anotherKey: anotherValue
+$ kubectl apply -f ConfigMap.yml
+
+
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-configmap-pod
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox
+    command: ['sh', '-c', "echo $(MY_VAR) && sleep 3600"]
+    env:
+    - name: MY_VAR
+      valueFrom:
+        configMapKeyRef:
+          name: my-config-map
+          key: myKey
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-configmap-volume-pod
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox
+    command: ['sh', '-c', "echo $(cat /etc/config/myKey) && sleep 3600"]
+    volumeMounts:
+      - name: config-volume
+        mountPath: /etc/config
+  volumes:
+    - name: config-volume
+      configMap:
+        name: my-config-map
+
+
+kubectl logs my-configmap-pod
+kubectl logs my-configmap-volume-pod
+kubectl exec my-configmap-volume-pod -- ls /etc/config
+kubectl exec my-configmap-volume-pod -- cat /etc/config/myKey        
+
+
+
+## Security context
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-securitycontext-pod
+spec:
+  securityContext:
+    runAsUser: 2001
+    fsGroup: 3001
+  containers:
+  - name: myapp-container
+    image: busybox
+    command: ['sh', '-c', "cat /message/message.txt && sleep 3600"]
+    volumeMounts:
+    - name: message-volume
+      mountPath: /message
+  volumes:
+  - name: message-volume
+    hostPath:
+      path: /etc/message
+
+
+
+
+# Resource Requirements (limits)
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-resource-pod
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox
+    command: ['sh', '-c', 'echo Hello Kubernetes! && sleep 3600']
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+
+
+### Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-secret
+stringData:
+  myKey: myPassword
+ (similar to config map apply this secret instand to create)
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-secret-pod
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox
+    command: ['sh', '-c', "echo Hello, Kubernetes! && sleep 3600"]
+    env:
+    - name: MY_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: my-secret
+          key: myKey
+
+
+## service account
+kubectl create serviceaccount my-serviceaccount
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-serviceaccount-pod
+spec:
+  serviceAccountName: my-serviceaccount
+  containers:
+  - name: myapp-container
+    image: busybox
+    command: ['sh', '-c', "echo Hello, Kubernetes! && sleep 3600"]
+
+

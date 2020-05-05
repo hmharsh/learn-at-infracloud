@@ -1,0 +1,8 @@
+- cluster setup (with Flannel for networking)
+- basic image generation with docker
+- kubectl basic commands for simple Pod, Deployment, Service 
+- Types of service (ClusterIP,NodePort,Load Balancer)
+- creating and using namespace
+- Config map (creating and use by env var and volume mount)
+- Security context (become specific user and group by runAsUser,fsGroup), secrets (using tham by env variable) ,Resource Requirements (limits)
+- service account importance and how to use them in spec
