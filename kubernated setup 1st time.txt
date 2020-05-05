@@ -348,3 +348,78 @@ spec:
     command: ['sh', '-c', "echo Hello, Kubernetes! && sleep 3600"]
 
 
+# emptyDir in volume
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volume-pod
+spec:
+  containers:
+  - image: busybox
+    name: busybox
+    command: ["/bin/sh", "-c", "while true; do sleep 3600; done"]
+    volumeMounts:
+    - mountPath: /tmp/storage
+      name: my-volume
+  volumes:
+  - name: my-volume
+    emptyDir: {}
+
+
+
+# 3 ways for containers within same pod can communicate
+- shared network (simply by localhost:port no)
+- shared storage volume
+- shared process namespace (by setting -> sharedProcessNamespace: True)
+
+# 3 design patterns
+- sidecar pattern
+- Ambassador pattern 
+- Adapter pattern 
+
+# PV and PVC
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: my-pv
+spec:
+  storageClassName: local-storage
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 512Mi
+
+kubectl get pv
+kubectl get pvc 
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: my-pvc-pod
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    command: ["/bin/sh", "-c", "while true; do sleep 3600; done"]
+    volumeMounts:
+    - mountPath: "/mnt/storage"
+      name: my-storage
+  volumes:
+  - name: my-storage
+    persistentVolumeClaim:
+      claimName: my-pvc
