@@ -1,3 +1,4 @@
+
 - cluster setup (with Flannel for networking)
 - basic image generation with docker
 - kubectl basic commands for simple Pod, Deployment, Service 
