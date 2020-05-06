@@ -96,8 +96,10 @@ spec:
   ```
 
 kubectl get pods
+kubectl get pod <pod name> -O wide // for more imp info in single line 
 kubectl describe pod nginx
 kubectl delete pod nginx
+kubectl get pods --all-namespaces // --all-namespaces is option 
 
 
 ```
@@ -177,13 +179,14 @@ spec:
     app: nginx
   ports:
   - protocol: TCP
-    port: 80
-    targetPort: 80
+    port: 8080 // host port
+    targetPort: 80 // container port
     nodePort: 30080  //You’ll be able to contact the NodePort Service, from outside the cluster, by requesting <NodeIP>:<NodePort>.,  a NodePort in the range of 30000 - 32767 and an internal cluster IP address is assigned to the service.
   type: NodePort
 EOF
 ```
 kubectl get svc
+kubectl get endpoints my-service or kubectl get ep my-service
 
 
 kubectl create namespace robot-shop
@@ -258,8 +261,9 @@ spec:
 kubectl logs my-configmap-pod
 kubectl logs my-configmap-volume-pod
 kubectl exec my-configmap-volume-pod -- ls /etc/config
-kubectl exec my-configmap-volume-pod -- cat /etc/config/myKey        
+kubectl exec my-configmap-volume-pod -- cat /etc/config/myKey    
 
+kubectl logs <pod_name> -c <container_name_inside_that_pod> // this option required for a multicontainer pod
 
 
 ## Security context
@@ -423,3 +427,182 @@ spec:
   - name: my-storage
     persistentVolumeClaim:
       claimName: my-pvc
+
+# Labels and selector
+ kubectl get pods --show-labels // also visible under describe
+ kubectl get pods -l app=my-app
+ kubectl get pods -l environment=production
+ kubectl get pods -l environment=development
+ kubectl get pods -l environment!=production
+ kubectl get pods -l 'environment in (development,production)'
+ kubectl get pods -l app=my-app,environment=production
+
+# Annotation
+   => Similar to labels but not intended to be used as selectors, just purpose is to store custom key value pair
+   apiVersion: v1
+   kind: Pod
+   metadata:
+     name: my-annotation-pod
+     annotations:
+       owner: terry@linuxacademy.com
+       git-commit: bdab0c6
+   spec: ...
+
+# kubectl edit deployment <deployment name> // opens up a file containing deployment, to make any change in deployment
+
+
+# Roling update and roll back
+  kubectl set image deployment/<name of deployment> nginx=nginx:1.7.9 --record  // container_name=update_in_container
+  kubectl rollout history deployment/<name of deployment>
+  kubectl rollout history deployment/<name of deployment> --revision=2 // for more infor of specific one
+  kubectl rollout undo deployment/<name of deployment> // just get back to previous version
+  kubectl rollout undo deployment/<name of deployment> --to-revision=1 // get back to specific version
+control the rollig update using strategy 
+  spec:
+   strategy:
+     rollingUpdate:
+       maxSurge: 3
+       maxUnavailable: 2
+   replicas: 3
+
+
+# Jobs, that run container just like pod but unlike pod id not keep on running for always. it contain containers which removed after performing certain tasks, hance jobs are more relaible way to run such containers
+
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi
+spec:
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never
+  backoffLimit: 4 // similar to 4 retries on failure before to declare actual failure
+
+  $ kubectl get jobs
+  $ kubectl logs <name of pod> // pod still there container is removed
+
+# cron jobs
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hello
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello
+            image: busybox
+            args:
+            - /bin/sh
+            - -c
+            - date; echo Hello from the Kubernetes cluster
+          restartPolicy: OnFailure
+ $ kubectl get cronjobs
+ $ kubectl logs <name of pod> // pod still there container is removed
+
+
+# Network Policy
+In order to use NetworkPolicies in the cluster, we need to have a network plugin 
+$ wget -O canal.yaml https://docs.projectcalico.org/v3.5/getting-started/kubernetes/installation/hosted/canal/canal.yaml
+$ kubectl apply -f canal.yaml
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: my-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: secure-app
+  policyTypes:  // which will be used in this policy
+  - Ingress
+  - Egress
+  ingress:  // to allow incoming traffic
+  - from:
+    - podSelector:   // also namespaceSelector, ipBlock (for CIDR block) filters do exists
+        matchLabels:
+          allow-access: "true"  // to apply on all those pods having this label
+    ports:
+    - protocol: TCP
+      port: 80
+  egress:  // to allow outgoing traffic
+  - to:
+    - podSelector:
+        matchLabels:
+          allow-access: "true"
+    ports:
+    - protocol: TCP
+      port: 80
+
+kubectl get networkpolicies
+kubectl describe networkpolicy my-network-policy
+
+
+# Probe: help to write custom logic to determine pod is healthy or not (help in spining up new container)
+Liveness and Readiness Probes
+
+Liveness probs: logic to determine wather or not container is live (running properly) 
+Readiness probe: logic to determine wather or not container is ready to service  request
+
+Examples: 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-liveness-pod
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox
+    command: ['sh', '-c', "echo Hello, Kubernetes! && sleep 3600"]
+    livenessProbe:
+      exec:       // more diffetern types available as httpGet
+        command:
+        - echo
+        - testing
+      initialDelaySeconds: 5 // wait this time before to run for the 1st time 
+      periodSeconds: 5   // run this every 5 sec
+
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-readiness-pod
+spec:
+  containers:
+  - name: myapp-container
+    image: nginx
+    readinessProbe:
+      httpGet:
+        path: /
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+
+
+# TOP 
+kubectl top pods
+kubectl top pod resource-consumer-big
+kubectl top pods -n kube-system
+kubectl top nodes
+
+
+# Metrics server: provides APi to access data about resources
+git clone https://github.com/linuxacademy/metrics-server
+kubectl apply -f ~/metrics-server/deploy/1.8+/  (1.8 from kubernetes version)
+kubectl get --raw /apis/metrics.k8s.io/  (--raw to access API directly) and resource data contain cpu and memory usage
+
+# we can not add new fields (eg livenessprob etc) with kubectl edit, we simply need to create new pod in that case, we can only update existing values with this edit feature'
+best way to recreate pod is use
+kubectl get pod nginx -n nginx-ns -o yaml --export // export only descriptor, not the status in yaml formate, now just edit and create (output doesnt contain namespace value)
+
+
+

@@ -8,3 +8,10 @@
 - Security context (become specific user and group by runAsUser,fsGroup), secrets (using tham by env variable) ,Resource Requirements (limits)
 - service account importance and how to use them in spec
 - PV and PVC
+
+- label selectors and annotations
+- Edit deployments
+- Roling update and roll back
+- jobs and cronjobs
+- network policy
+- Liveness and Readiness Probes 
