@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: busybox
+  labels:
+    app: busybox
+spec:
+  containers:
+    - name: busybox
+      image: busybox
+      command: ["/bin/sh", "-c", "echo from env && echo $(myVar) && echo from volume && cat /mnt/data/myname && sleep 1000"]
+      env:
+        - name: myVar
+          valueFrom:
+            configMapKeyRef:
+              name: my-config-map
+              key: myname
+      volumeMounts:
+        - name: config-vol
+          mountPath: /mnt/data
+  volumes:
+    - name: config-vol
+      configMap:
+        name: my-config-map     

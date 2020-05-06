@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+  annotations:
+    author: harshit
+spec:
+  containers:
+    - name: nginx
+      image: busybox  
+      command: ['sh', '-c', "echo Hello, Kubernetes >> /mnt/storage/sucess"]
+      volumeMounts:
+        - mountPath:  "mnt/storage"
+          name: myvol
+    - name: busybox
+      image: busybox
+      command: ['sh', '-c', "echo Hello, Kubernetes! && ls /mnt/storage && cat /mnt/storage/sucess && sleep 3600"]
+      volumeMounts:
+        - mountPath: "/mnt/storage"
+          name: myvol 
+  volumes:
+    - name: myvol
+      hostPath: 
+        path: /home/cloud_user   
+
