@@ -303,10 +303,10 @@ spec:
     image: busybox
     command: ['sh', '-c', 'echo Hello Kubernetes! && sleep 3600']
     resources:
-      requests:
+      requests:          # required to run container, initially allocate this
         memory: "64Mi"
         cpu: "250m"
-      limits:
+      limits:            # max limit
         memory: "128Mi"
         cpu: "500m"
 
@@ -396,6 +396,13 @@ spec:
   hostPath:
     path: "/mnt/data"
 
+accessModes:
+ReadWriteOnce -- the volume can be mounted as read-write by a single node RWO
+ReadOnlyMany -- the volume can be mounted read-only by many nodes ROX
+ReadWriteMany -- the volume can be mounted as read-write by many nodes RWX
+
+
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -430,7 +437,8 @@ spec:
 
 # Labels and selector
  kubectl get pods --show-labels // also visible under describe
- kubectl get pods -l app=my-app
+ kubectl get pods -l app // label name filter
+ kubectl get pods -l app=my-app  
  kubectl get pods -l environment=production
  kubectl get pods -l environment=development
  kubectl get pods -l environment!=production
