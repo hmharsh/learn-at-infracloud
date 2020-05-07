@@ -1,3 +1,4 @@
+
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 
 sudo add-apt-repository \
@@ -444,6 +445,8 @@ spec:
  kubectl get pods -l 'environment in (development,production)'
  kubectl get pods -l app=my-app,environment=production
 
+ kubectl logs -f -l jobgroup=jobexample
+
 # Annotation
    => Similar to labels but not intended to be used as selectors, just purpose is to store custom key value pair
    apiVersion: v1
@@ -558,6 +561,12 @@ Liveness and Readiness Probes
 
 Liveness probs: logic to determine wather or not container is live (running properly) 
 Readiness probe: logic to determine wather or not container is ready to service  request
+
+```
+> In Liveness if condition get false container gets restart, 
+but in rediness probe container gets terminated or do not send traffic to that pod
+(both have same syntax) 
+```
 
 Examples: 
 apiVersion: v1
