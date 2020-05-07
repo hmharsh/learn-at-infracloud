@@ -1,0 +1,17 @@
+apiVersion: settings.k8s.io/v1alpha1
+kind: PodPreset
+metadata:
+  name: podpreset
+spec:
+  selector:
+    matchLabels:
+      role: frontend
+  env:
+    - name: AUTHOR
+      value: "Harshit Mahajan"
+  volumeMounts:
+    - mountPath: /magic
+      name: magic
+  volumes:
+    - name: magic
+      emptyDir: {}

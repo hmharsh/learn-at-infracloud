@@ -561,6 +561,8 @@ Liveness and Readiness Probes
 
 Liveness probs: logic to determine wather or not container is live (running properly) 
 Readiness probe: logic to determine wather or not container is ready to service  request
+startupProbe: Indicates whether the application within the Container is started. All other probes are disabled if a startup probe is provided, until it succeeds. If the startup probe fails, the kubelet kills the Container
+
 
 ```
 > In Liveness if condition get false container gets restart, 
@@ -620,5 +622,51 @@ kubectl get --raw /apis/metrics.k8s.io/  (--raw to access API directly) and reso
 best way to recreate pod is use
 kubectl get pod nginx -n nginx-ns -o yaml --export // export only descriptor, not the status in yaml formate, now just edit and create (output doesnt contain namespace value)
 
+
+
+### Citadel start 
+# Init containers
+    Init containers are exactly like regular containers, except:
+     - Init containers always run to completion.
+     - Each init container must complete successfully before the next one starts.
+     - Init containers do not support readiness probes because init containers must run to completion before the Pod can be ready.
+     - the resource requests and limits for an init container are handled differently.
+     - it can used with pod,deployment, job etc
+
+            apiVersion: v1
+            metadata:
+              name: mic
+            kind: Pod
+            spec:
+              containers:
+                - name: busybox
+                  image: busybox
+                  args: ['sh', '-c', 'echo Init container: The app is running! && cat /tmp/storage/welcome.txt  && sleep 30']
+                  volumeMounts:
+                   - mountPath: /tmp/storage
+                     name: my-volume
+              initContainers:
+                - name: ibusybox
+                  image: busybox
+                  args: ['sh', '-c', 'echo The app is running! && echo harshit > /tmp/storage/welcome.txt && sleep 10']
+                  volumeMounts:
+                   - mountPath: /tmp/storage
+                     name: my-volume
+              volumes:
+              - name: my-volume
+                emptyDir: {}
+
+ 
+
+# podpreset
+  - A Pod Preset is an API resource for injecting additional runtime requirements into a Pod at creation time
+  - A Pod Preset is capable of modifying the following fields in a Pod spec when appropriate: - The .spec.containers field. - The initContainers field
+  - it cal also be disable for specific pod by using podpreset.admission.kubernetes.io/exclude: "true" in pod spec
+  - config map and secrets can also be used by podpreset
+
+  ```
+You have enabled the API type settings.k8s.io/v1alpha1/podpreset. For example, this can be done by including settings.k8s.io/v1alpha1=true in the --runtime-config option for the API server. In minikube add this flag --extra-config=apiserver.runtime-config=settings.k8s.io/v1alpha1=true while starting the cluster.
+You have enabled the admission controller PodPreset. One way to doing this is to include PodPreset in the --enable-admission-plugins option value specified for the API server. In minikube add this flag
+```
 
 

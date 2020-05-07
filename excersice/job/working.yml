@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: countdown
+spec:
+  template:
+    metadata:
+      name: countdown
+    spec:
+      containers:
+      - name: counter
+        image: busybox
+        command:
+         - "bin/bash"
+         - "-c"
+         - "echo hi && sleep 2 && echo success"
+      restartPolicy: Never

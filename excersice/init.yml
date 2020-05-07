@@ -1,0 +1,22 @@
+apiVersion: v1
+metadata: 
+  name: mic
+kind: Pod
+spec:
+  containers:
+    - name: busybox
+      image: busybox
+      args: ['sh', '-c', 'echo Init container: The app is running! && cat /tmp/storage/welcome.txt  && sleep 30']
+      volumeMounts:
+       - mountPath: /tmp/storage
+         name: my-volume
+  initContainers:
+    - name: ibusybox
+      image: busybox
+      args: ['sh', '-c', 'echo The app is running! && echo harshit > /tmp/storage/welcome.txt && sleep 10']
+      volumeMounts:
+       - mountPath: /tmp/storage
+         name: my-volume
+  volumes:
+  - name: my-volume
+    emptyDir: {}

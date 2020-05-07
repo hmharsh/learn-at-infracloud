@@ -1,0 +1,37 @@
+apiVersion: v1
+metadata:
+  name: hostfile
+  labels:
+    app: httpd
+kind: Pod
+spec:
+  initContainers:
+    - name: staticfile
+      image: busybox
+      command: ["sh", "-c", "echo content of static file > /mnt/data/index.html && sleep 5"]
+      volumeMounts:
+        - mountPath: /mnt/data
+          name: filestore
+  containers:
+    - name: httpd
+      image: httpd
+      volumeMounts:
+        - mountPath: /usr/local/apache2/htdocs/
+          name: filestore
+      livenessProbe:
+        exec:       
+          command:
+          - cat
+          - /usr/local/apache2/htdocs/index.html
+        initialDelaySeconds: 5  
+        periodSeconds: 5   
+      readinessProbe:
+        exec:       
+          command:
+          - echo
+          - container is working and ready 
+        initialDelaySeconds: 5  
+        periodSeconds: 5   
+  volumes:
+    - name: filestore
+      emptyDir: {}   

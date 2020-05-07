@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ld
+spec:
+  containers:
+  - name: lifecycle-demo-container
+    image:  busybox
+    args: ["bin/sh", "-c", "echo hii && sleep 3600"]
+    lifecycle:
+      postStart:
+        exec:
+          command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /tmp/message"]
+      preStop:
+        exec:
+          command: ["/bin/sh","-c","nginx -s quit; while killall -0 nginx; do sleep 1; done"]
+

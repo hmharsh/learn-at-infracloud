@@ -1,3 +1,4 @@
+
 - cluster setup (with Flannel for networking)
 - basic image generation with docker
 - kubectl basic commands for simple Pod, Deployment, Service 
@@ -14,3 +15,11 @@
 - jobs and cronjobs
 - network policy
 - Liveness and Readiness Probes 
+
+- different usecase of Liveness and Readiness Probes  and checking behavior of pod once condition fails (restart, and not farwarding traffic)
+- Init continers (volume mount and data share, with job, with deployment)
+- podpreset 
+- pod-lifecycle, startup prob
+
+- container lifecycle events (post start and pre stop) 
+

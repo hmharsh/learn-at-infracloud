@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+metadata:
+  name: myapp
+kind: Job
+spec:
+  template:
+    spec:
+      containers:
+        - name: busybox
+          image: busybox
+          args: 
+            - "bin/sh"
+            - "-c"
+            - "echo hello"
+      restartPolicy: OnFailure
+#  backoffLimit: 4
+#  parallelism: 2
