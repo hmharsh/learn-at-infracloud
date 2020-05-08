@@ -1,48 +1,37 @@
 
-# Cluster setup 
-## 1. Installing Docker
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
 sudo add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
    $(lsb_release -cs) \
    stable"
+
 sudo apt-get update
+
 sudo apt-get install -y docker-ce=18.06.1~ce~3-0~ubuntu
+
 sudo apt-mark hold docker-ce
 
-##  2. Installing Kubeadm, Kubelet, and Kubectl
+
+
+
+
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
 cat << EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
 deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
+
 sudo apt-get update
+
 sudo apt-get install -y kubelet=1.12.7-00 kubeadm=1.12.7-00 kubectl=1.12.7-00
+
 sudo apt-mark hold kubelet kubeadm kubectl
-kubeadm version
-
-## 3 bootstraping cluster
-sudo kubeadm init --pod-network-cidr=10.244.0.0/16
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-kubectl version
-
-sudo kubeadm join $some_ip:6443 --token $some_token --discovery-token-ca-cert-hash $some_hash // get from output of kubeadm init and execute on non master nodes to join the cluster
-
-kubectl get nodes
 
 
-## 4 Flannel for network setup (FOR CNI)
-(on all 3 node)
-echo "net.bridge.bridge-nf-call-iptables=1" | sudo tee -a /etc/sysctl.conf
-sudo sysctl -p
+bootstraping cluster
+Flannel for network setup
 
-(on master)
-kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8681ece4de4c0d86c5cd2643275/Documentation/kube-flannel.yml
-kubectl get nodes // status must be ready
-kubectl get pods -n kube-system // verify Flannel pods are up 
-
-====================================Cluster Setup colplete===================================
 
 kubectl create –f Tesing_for_Image_pull
 kubectl log Tesing_for_Image_pull
@@ -59,12 +48,41 @@ ClusterIP --> within cluster
 NodePort  --> expose service to static IP and port
 Load Balancer
 
-> Replica Set ensures how many replica of pod should be running. It can be considered as a replacement of replication controller. The key difference between the replica set and the replication controller is, the replication controller only supports equality-based selector whereas the replica set supports set-based selector.
 
-> Deployments are upgraded and higher version of replication controller. They manage the deployment of replica sets which is also an upgraded version of the replication controller. They have the capability to update the replica set and are also capable of rolling back to the previous version.
+# Replicaset 
+      apiVersion: apps/v1
+      kind: ReplicaSet
+      metadata:
+        name: myreplicaset
+        labels:
+          app: replicaset
+      spec:
+        replicas: 2
+        selector:
+          #matchLabels:
+            #app: replicaset
+          matchExpressions:  # difference in replication controller and replicaset, set based match can be applied here
+              - { key: app, operator: In, values: [replicaset]} # NotIn can also be used in operator
+        template:
+          metadata:
+            labels:
+              app: replicaset
+          spec:
+            containers:
+              - name: nginx
+                image: nginx
+
+> Replica Set ensures how many replica of pod should be running. 
+  It can be considered as a replacement of replication controller.
+  The key difference between the replica set and the replication controller is,
+  the replication controller only supports equality-based selector 
+  whereas the replica set supports set-based selector.
+> Deployments are upgraded and higher version of replication controller. 
+  They manage the deployment of replica sets which is also an upgraded version of the replication controller. 
+  They have the capability to update the replica set and are also capable of rolling back to the previous version.
+
 
 > kubectl create –f Deployment.yaml -–record
-
 > kubectl get deployments
 > kubectl rollout status deployment/Deployment
 > ubectl set image deployment/Deployment tomcat=tomcat:6.0
@@ -675,9 +693,120 @@ kubectl get pod nginx -n nginx-ns -o yaml --export // export only descriptor, no
   - it cal also be disable for specific pod by using podpreset.admission.kubernetes.io/exclude: "true" in pod spec
   - config map and secrets can also be used by podpreset
 
-  ```
+```
 You have enabled the API type settings.k8s.io/v1alpha1/podpreset. For example, this can be done by including settings.k8s.io/v1alpha1=true in the --runtime-config option for the API server. In minikube add this flag --extra-config=apiserver.runtime-config=settings.k8s.io/v1alpha1=true while starting the cluster.
 You have enabled the admission controller PodPreset. One way to doing this is to include PodPreset in the --enable-admission-plugins option value specified for the API server. In minikube add this flag
 ```
+
+Pause is a secret container that runs on every pod in Kubernetes. This container’s primary job is to keep the namespace open in case all the other containers on the pod die.
+
+# Daemon Set
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: mydaemon
+  labels:
+    app: daemontest
+spec:
+  selector:
+    matchLabels:
+      app: daemontest
+  template:
+    metadata:
+      labels:
+        app: daemontest
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+      containers:
+        - name: nginx
+          image: nginx
+
+
+# Assigning pod to a node (nodeSelector)
+kubectl label nodes <node-name> <label-key>=<label-value>
+kubectl get nodes --show-labels
+
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: nginx
+      labels:
+        env: test
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        imagePullPolicy: IfNotPresent
+      nodeSelector:
+        disktype: ssd
+
+
+
+
+
+
+# Stateful set
+  1. StatefulSets do not provide any guarantees on the termination of pods when a StatefulSet is deleted. To achieve ordered and graceful termination of the pods in the StatefulSet, it is possible to scale the StatefulSet down to 0 prior to deletion.
+  2. When using Rolling Updates with the default Pod Management Policy (OrderedReady), it’s possible to get into a broken state that requires manual intervention to repair.
+  3. Headless service: Sometimes you don’t need load-balancing and a single Service IP. In this case, you can create what are termed “headless” Services, by explicitly specifying "None" for the cluster IP (.spec.clusterIP).
+  4. All pods (during replication) created one after another succeeds
+  5. When the StatefulSet Controller creates a Pod, it adds a label, statefulset.kubernetes.io/pod-name, that is set to the name of the Pod. This label allows you to attach a Service to a specific Pod in the StatefulSet.
+  6. The volumeClaimTemplates will provide stable storage using PersistentVolumes provisioned by a PersistentVolume Provisioner (can also used with deployments)
+    
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: nginx
+        labels:
+          app: nginx
+      spec:
+        ports:
+        - port: 80
+          name: web
+        clusterIP: None
+        selector:
+          app: nginx
+      ---
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: web
+      spec:
+        selector:
+          matchLabels:
+            app: nginx # has to match .spec.template.metadata.labels
+        serviceName: "nginx"
+        replicas: 3 # by default is 1
+        template:
+          metadata:
+            labels:
+              app: nginx # has to match .spec.selector.matchLabels
+          spec:
+            terminationGracePeriodSeconds: 10
+            containers:
+            - name: nginx
+              image: k8s.gcr.io/nginx-slim:0.8
+              ports:
+              - containerPort: 80
+                name: web
+              volumeMounts:
+              - name: www
+                mountPath: /usr/share/nginx/html
+        volumeClaimTemplates:
+        - metadata:
+            name: www
+          spec:
+            accessModes: [ "ReadWriteOnce" ]
+            storageClassName: "my-storage-class"
+            resources:
+              requests:
+                storage: 1Gi 
+      
+      
+ kubectl get sts,po,pvc,svc
+ 
 
 

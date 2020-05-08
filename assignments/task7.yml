@@ -1,0 +1,27 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+   name: my-secret
+stringData:
+   myname: Harshit
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox
+  labels:
+    app: busybox
+spec:
+  containers:
+    - name: busybox
+      image: busybox
+      command: ["/bin/sh", "-c", "echo hello && echo $(mySec)  && sleep 1000"]
+      env:
+        - name: mySec
+          valueFrom:
+            secretKeyRef:
+              name: my-secret
+              key: myname
+

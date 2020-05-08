@@ -1,0 +1,26 @@
+# Run an nginx pod, upgrade the pod, rollback the deployment, record history.
+
+## Pod upgrade
+1. create a simple nginx pod
+2. kubectl edit <podname>
+3. change image name or whatever the update required
+4. save and exit, pod upgrade start
+
+## Deployment upgrade, recoard and rollback
+1. create a simple deployment (say name of deployment is depnginx)
+2. let's consider we need to change image of deployment 
+
+  > podskubectl set image deployment/depnginx nginx=nginx:httpd --record  
+  where -> deployment/<deployment name> <container name> = <new image name, or same image with new version>
+
+3. check the history
+  > kubectl rollout history deployment/depnginx 
+
+4. more information about specific version in history
+  > kubectl rollout history deployment/depnginx --revision=2 
+
+5. go back to previous version
+  > kubectl rollout undo deployment/depnginx
+
+6. go back to specific version
+  > kubectl rollout undo deployment/depnginx --to-revision=1

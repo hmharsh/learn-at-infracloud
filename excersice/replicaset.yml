@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: myreplicaset
+  labels:
+    app: replicaset
+spec:
+  replicas: 2
+  selector:
+    #matchLabels:
+      #app: replicaset
+    matchExpressions:  # difference in replication controller and replicaset, set based match can be applied here
+        - { key: app, operator: In, values: [replicaset]} # NotIn can also be used in operator
+  template:
+    metadata:
+      labels:
+        app: replicaset
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          

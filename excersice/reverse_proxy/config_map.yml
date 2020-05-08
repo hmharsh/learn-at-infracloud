@@ -1,0 +1,10 @@
+---
+# set config map input
+
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+     name: my-config-map
+  data:
+     VIRTUAL_HOST: http://10.97.182.28
+    
