@@ -807,6 +807,97 @@ kubectl get nodes --show-labels
       
       
  kubectl get sts,po,pvc,svc
- 
 
+
+
+ External IP in service
+
+     apiVersion: v1
+     kind: Service
+     metadata:
+       name: my-service
+     spec:
+       selector:
+         app: MyApp
+       ports:
+         - name: http
+           protocol: TCP
+           port: 80
+           targetPort: 9376
+       externalIPs:
+         - 80.11.12.10
+
+
+
+
+# API in kubernetes (2 simple ways, also programing langiage specific libraries are also there)
+REF: https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/
+1. Using kubectl proxy
+    kubectl proxy --port=8080
+    curl http://localhost:8080/api/ (similarly all api can be used as documented at https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/)
+    curl http://localhost:8080/api/v1/namespaces/default/pods
+
+1.5 by using kubectl-proxy pod
+     
+    kubectl run test --image=chadmcrowell/kubectl-proxy // to quickly run this image as pod
+    kubectl exec -it <name-of-pod> sh
+    curl localhost:8001/api/v1/namespaces/default/pods // inside container
+
+2. Without kubectl proxy
+    APISERVER=$(kubectl config view --minify | grep server | cut -f 2- -d ":" | tr -d " ")
+    SECRET_NAME=$(kubectl get secrets | grep ^default | cut -f1 -d ' ')
+    TOKEN=$(kubectl describe secret $SECRET_NAME | grep -E '^token' | cut -f2 -d':' | tr -d " ")
+    
+    curl $APISERVER/api --header "Authorization: Bearer $TOKEN" --insecure
+    curl $APISERVER/api/v1/namespaces/default/pods --header "Authorization: Bearer $TOKEN" --insecure // to get all pod running
+    they may get fail due to permission issue
+    "User "system:serviceaccount:default:default" cannot get at the cluster scope."
+    to resolve this 
+    You should bind service account system:serviceaccount:default:default (which is the default account bound to Pod) with role cluster-admin, just create a yaml (named like fabric8-rbac.yaml) with following contents:
+    run 
+      ```
+        # NOTE: The service account `default:default` already exists in k8s cluster.
+        # You can create a new account following like this:
+        #---
+        #apiVersion: v1
+        #kind: ServiceAccount
+        #metadata:
+        #  name: <new-account-name>
+        #  namespace: <namespace>
+
+        ---
+        apiVersion: rbac.authorization.k8s.io/v1beta1
+        kind: ClusterRoleBinding
+        metadata:
+          name: fabric8-rbac
+        subjects:
+          - kind: ServiceAccount
+            # Reference to upper's `metadata.name`
+            name: default
+            # Reference to upper's `metadata.namespace`
+            namespace: default
+        roleRef:
+          kind: ClusterRole
+          name: cluster-admin
+          apiGroup: rbac.authorization.k8s.io
+      ```
+
+
+# View the token file from within a pod:
+  cat /var/run/secrets/kubernetes.io/serviceaccount/token  (==> kubectl exec  httpd -- ls /var/run/secrets/kubernetes.io/serviceaccount/token)
+
+# cat ~/.kube/config 
+role: what can do it
+binding: who can do it
+
+1. role and role binding : ns lavel resources
+2. cluster role and cluster bindings are cluster lavel resources
+
+All requestes come either by client (user), or pod goes through 3 phases
+1. authentication (check user is valid)
+2. authorization (check wahter valid user have permission to perform the requested work)
+3. Admission (to etcd)
+
+# Run a Quick pod
+kubectl run test --image=nginx --ns=default
 
