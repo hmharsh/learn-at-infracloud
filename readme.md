@@ -27,7 +27,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 kubeadm version
 ```
 
-### 3 bootstraping cluster
+###  bootstraping cluster
 ```
 sudo kubeadm init --pod-network-cidr=10.244.0.0/16
 mkdir -p $HOME/.kube
@@ -40,7 +40,7 @@ sudo kubeadm join $some_ip:6443 --token $some_token --discovery-token-ca-cert-ha
 kubectl get nodes
 ```
 
-### 4 Flannel for network setup (FOR CNI)
+###  Flannel for network setup (FOR CNI)
 ```
 (on all 3 node)
 echo "net.bridge.bridge-nf-call-iptables=1" | sudo tee -a /etc/sysctl.conf
@@ -51,6 +51,8 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/bc79dd1505b0c8
 kubectl get nodes // status must be ready
 kubectl get pods -n kube-system // verify Flannel pods are up 
 ```
+
+
 
 
 
