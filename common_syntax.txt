@@ -898,6 +898,131 @@ All requestes come either by client (user), or pod goes through 3 phases
 2. authorization (check wahter valid user have permission to perform the requested work)
 3. Admission (to etcd)
 
-# Run a Quick pod
+# Run a Quick single pod deployment
 kubectl run test --image=nginx --ns=default
+kubectl port-forward $pod_name 8081:80 (host_port : container port)
 
+
+
+
+# backing up and restoring cluster:
+(involvs backup and restore of etcd only b'coz all cluster stated is available here) 
+    wget https://github.com/etcd-io/etcd/releases/download/v3.3.12/etcd-v3.3.12-linux-amd64.tar.gz
+    tar xvf etcd-v3.3.12-linux-amd64.tar.gz
+    sudo mv etcd-v3.3.12-linux-amd64/etcd* /usr/local/bin
+    sudo ETCDCTL_API=3 etcdctl snapshot save snapshot.db --cacert /etc/kubernetes/pki/etcd/ca.crt --cert /etc/kubernetes/pki/etcd/server.crt --key /etc/kubernetes/pki/etcd/server.key
+    ETCDCTL_API=3 etcdctl --help
+    sudo tar -zcvf etcd.tar.gz /etc/kubernetes/pki/etcd
+    scp etcd.tar.gz cloud_user@18.219.235.42:~/
+
+
+# Take down a node from cluster for maintaiance 
+     kubectl get pods -o wide
+     kubectl drain [node_name] --ignore-daemonsets // to take all pode from the node to another one
+     kubectl get nodes -w
+     
+     // make changes in node and 
+        kubectl uncordon [node_name] // to take back that same node again to cluster
+     
+     // if changes are big like node replace by new one or os upgrade after drain delete the node from the cluster
+     
+     kubectl delete node [node_name]
+     
+      // perform the upgrade, make sure kubedam, docker kubectl etc all prereq are installed on new upgraded node
+      sudo kubeadm token generate
+      sudo kubeadm token list
+      sudo kubeadm token create [token_name] --ttl 2h --print-join-command
+      // use this command in op of above command, on new node to join this cluster back
+
+# swiching config files to different version
+    kubectl convert -f pod.yaml --output-version v1
+
+
+## Get version of different components of k8 (required for upgradation of k8 version in cluster)
+# kubectl version --short 
+ show client (or kubectl) version and server (ie API server) version
+# kubectl describe nodes 
+ get kubectl and kube-proxy version
+# get controller manager version
+   kubectl get po [controller_pod_name] -o yaml -n kube-system   // controller_pod_name is starting from kubectl control manager and ending with node hostname
+   -> the the version from image name in the above version
+
+
+## upgrade
+Release the hold on versions of kubeadm and kubelet:
+ $ sudo apt-mark unhold kubeadm kubelet
+ $ sudo apt install -y kubeadm=1.16.6-00
+ $ sudo apt-mark hold kubeadm
+ $ kubeadm version
+ $ sudo kubeadm upgrade plan // to check current versions and available version for upgrate
+ $ sudo kubeadm upgrade apply v1.16.6
+ $ sudo apt-mark unhold kubectl
+ $ sudo apt install -y kubectl=1.16.6-00
+ $ sudo apt-mark hold kubectl
+ $ sudo apt install -y kubelet=1.16.6-00
+ $ sudo apt-mark hold kubelet 
+
+ // only upgrade of kubelet is required on all worker node (unhold and upgrade)
+
+
+ # Look IP tables for specific service
+  sudo iptables-save | grep KUBE | grep nginx
+  // IP tables contain the details of which traffic where to farward (in both direction ie request and responce)
+
+  # kubectl scale deployment/kubeserve2 --replicas=2
+
+  load balancer type: Automatically get external IP and node Port
+  # kubectl expose deployment kubeserve2 --port 80 --target-port 8080 --type LoadBalancer // to create load balanccer type service   # Nature of load balancing can be controlled by applying specific annotations
+
+  # A service can map an incoming port to any targetPort. (The targetPort is set, by default, to the port field’s same value. The targetPort can be defined as a string.)
+
+
+```
+ClusterIP. This default type exposes the service on a cluster-internal IP. You can reach the service only from within the cluster.
+NodePort. This type of service exposes the service on each node’s IP at a static port. A ClusterIP service is created automatically, and the NodePort service will route to it. From outside the cluster, you can contact the NodePort service by using “<NodeIP>:<NodePort>”.
+LoadBalancer. This service type exposes the service externally using the load balancer of your cloud provider. The external load balancer routes to your NodePort and ClusterIP services, which are created automatically.
+ExternalName. This type maps the service to the contents of the externalName field (e.g., foo.bar.example.com). It does this by returning a value for the CNAME record.
+```
+
+# service-ingress
+similar to load balancer but by using only one external IP we can access more than one service unlike load balancer (one service per external IP)
+
+        apiVersion: extensions/v1beta1
+        kind: Ingress
+        metadata:
+          name: service-ingress
+        spec:
+          rules:
+          - host: kubeserve.example.com
+            http:
+              paths:
+              - backend:
+                  serviceName: kubeserve2
+                  servicePort: 80
+          - host: app.example.com
+            http:
+              paths:
+              - backend:
+                  serviceName: nginx
+                  servicePort: 80
+          - http:                       # all traffic without hostname will come here
+              paths:
+              - backend:
+                  serviceName: httpd
+                  servicePort: 80
+          
+# Way to define a file in configMap          
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes  3;
+    error_log  /var/log/nginx/error.log;
+    events {
+      worker_connections  10240;
+    }
+
+# now mount this as volume to create file with variable name    
