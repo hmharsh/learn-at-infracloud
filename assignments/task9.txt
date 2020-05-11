@@ -1,0 +1,2 @@
+Use the service Account with the pod which is not associated with any role as initial lines of https://kubernetes.io/docs/reference/access-authn-authz/rbac/#role-and-clusterrole
+After that pod will able to access the resources directly but not by using API or kubectl (if binary copied using docker cp) from inside the pod
