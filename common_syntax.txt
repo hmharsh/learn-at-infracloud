@@ -882,6 +882,32 @@ REF: https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/
           apiGroup: rbac.authorization.k8s.io
       ```
 
+```
+cloud_user@arpitsinghal2c:~/kubernates/excersice/rbac$ k get clusterrole cluster-admin -o yaml
+  apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRole
+  metadata:
+    annotations:
+      rbac.authorization.kubernetes.io/autoupdate: "true"
+    creationTimestamp: 2020-05-04T10:40:21Z
+    labels:
+      kubernetes.io/bootstrapping: rbac-defaults
+    name: cluster-admin
+    resourceVersion: "57"
+    selfLink: /apis/rbac.authorization.k8s.io/v1/clusterroles/cluster-admin
+    uid: a7a6f771-8df3-11ea-8556-0a55871d47c8
+  rules:
+  - apiGroups:
+    - '*'
+    resources:
+    - '*'
+    verbs:
+    - '*'
+  - nonResourceURLs:
+    - '*'
+    verbs:
+    - '*'
+```
 
 # View the token file from within a pod:
   cat /var/run/secrets/kubernetes.io/serviceaccount/token  (==> kubectl exec  httpd -- ls /var/run/secrets/kubernetes.io/serviceaccount/token)
@@ -892,6 +918,98 @@ binding: who can do it
 
 1. role and role binding : ns lavel resources
 2. cluster role and cluster bindings are cluster lavel resources
+
+RBAC: Role-based access control
+ABAC: Attribute-based access control
+
+A Role (the same applies to a ClusterRole) contains a list of rules. Each rule defines some actions that can be performed (e.g: list, get, watch) against a list of resources (e.g: Pod, Service, Secret) within apiGroups (eg: core, apps/v1).
+  ```
+  apiVersion: rbac.authorization.k8s.io/v1beta1
+  kind: Role
+  metadata:
+   name: list-pods
+   namespace: default
+  rules:
+   — apiGroups:
+     — ''
+   resources:
+     — pods
+   verbs:
+     — list
+  ```
+
+  or 
+  ```
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      namespace: default
+      name: pod-reader
+    rules:
+    - apiGroups: [""] # "" indicates the core API group
+      resources: ["pods"]
+      resourceNames: ["my-pod"]
+      verbs: ["get", "watch", "list"]
+  ```
+  ```
+   apiVersion: rbac.authorization.k8s.io/v1
+   kind: ClusterRole
+   metadata:
+     # "namespace" omitted since ClusterRoles are not namespaced
+     name: secret-reader
+   rules:
+   - apiGroups: [""]
+     #
+     # at the HTTP level, the name of the resource for accessing Secret
+     # objects is "secrets"
+     resources: ["secrets"]
+     verbs: ["get", "watch", "list"]
+  ```
+
+
+# Role binding
+A role binding grants the permissions defined in a role to a user or set of users. It holds a list of subjects (users, groups, or service accounts), and a reference to the role being granted.
+
+get, list, create, update, patch, watch, delete, and deletecollection
+
+```
+   apiVersion: rbac.authorization.k8s.io/v1beta1
+   kind: RoleBinding
+   metadata:
+    name: list-pods_demo-sa
+    namespace: default
+   roleRef:
+    kind: Role
+    name: list-pods
+    apiGroup: rbac.authorization.k8s.io
+   subjects:
+    — kind: ServiceAccount
+      name: demo-sa
+      namespace: default
+```
+or
+```
+    apiVersion: rbac.authorization.k8s.io/v1
+    # This role binding allows "jane" to read pods in the "default" namespace.
+    # You need to already have a Role named "pod-reader" in that namespace.
+    kind: RoleBinding
+    metadata:
+      name: read-pods
+      namespace: default
+    subjects:
+    # You can specify more than one "subject"
+    - kind: User
+      name: jane # "name" is case sensitive
+      apiGroup: rbac.authorization.k8s.io
+    roleRef:
+      # "roleRef" specifies the binding to a Role / ClusterRole
+      kind: Role #this must be Role or ClusterRole
+      name: pod-reader # this must match the name of the Role or ClusterRole you wish to bind to
+      apiGroup: rbac.authorization.k8s.io
+```  
+A RoleBinding can also reference a ClusterRole to grant the permissions defined in that ClusterRole to resources inside the RoleBinding’s namespace
+
+
 
 All requestes come either by client (user), or pod goes through 3 phases
 1. authentication (check user is valid)
@@ -985,6 +1103,19 @@ ExternalName. This type maps the service to the contents of the externalName fie
 ```
 
 # service-ingress
+
+simple ingress service 
+  apiVersion: extensions/v1beta1
+  kind: Ingress
+  metadata:
+    name: test-ingress
+  spec:
+    backend:
+      serviceName: testsvc
+      servicePort: 80
+
+
+
 similar to load balancer but by using only one external IP we can access more than one service unlike load balancer (one service per external IP)
 
         apiVersion: extensions/v1beta1
@@ -1010,6 +1141,33 @@ similar to load balancer but by using only one external IP we can access more th
               - backend:
                   serviceName: httpd
                   servicePort: 80
+
+## on single host multiple paths are also possible (as express routes.js file)
+
+k get ingress
+
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: simple-fanout-example
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: foo.bar.com
+    http:
+      paths:
+      - path: /foo
+        backend:
+          serviceName: service1
+          servicePort: 4200
+      - path: /bar
+        backend:
+          serviceName: service2
+          servicePort: 8080
+
+
           
 # Way to define a file in configMap          
 apiVersion: v1
@@ -1026,3 +1184,183 @@ data:
     }
 
 # now mount this as volume to create file with variable name    
+
+
+# DNS
+default: ns name
+.cluster.local: domain (from  kubectl exec busybox -- cat /etc/resolv.conf)
+kubectl exec -ti busybox -- nslookup [pod-ip-address].default.pod.cluster.local
+kubectl exec -ti busybox -- nslookup [service_name].default.svc.cluster.local
+
+custom DNS options with a Pod (all this will be reflacted in /etc/resolve.conf of POD's container)
+
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      namespace: default
+      name: dns-example
+    spec:
+      containers:
+        - name: test
+          image: nginx
+      dnsPolicy: "None"
+      dnsConfig:
+        nameservers:
+          - 8.8.8.8
+        searches:
+          - ns1.svc.cluster.local
+          - my.dns.search.suffix
+        options:
+          - name: ndots
+            value: "2"
+          - name: edns0
+
+
+ # Users and accounts
+  - API requests are tied to either a normal user or a service account, or are treated as anonymous requests. 
+
+
+kubectl cp /tmp/foo_dir <some-pod>:/tmp/bar_dir
+kubectl cp /tmp/foo <some-pod>:/tmp/bar -c <specific-container>
+kubectl cp /tmp/foo <some-namespace>/<some-pod>:/tmp/bar
+kubectl cp <some-namespace>/<some-pod>:/tmp/foo /tmp/bar
+
+
+kubectl get events
+
+## Metrics server
+installation
+(for official look: kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml)
+git clone https://github.com/linuxacademy/metrics-server
+kubectl apply -f ~/metrics-server/deploy/1.8+/
+test it installed successfully
+kubectl get --raw /apis/metrics.k8s.io/
+wait for a min for this server to collect all data
+now run
+
+kubectl top node
+kubectl top pods, kubectl top pods --all-namespaces, kubectl top pod -l run=pod-with-defaults, kubectl top pods -n kube-system
+kubectl top pods <pod name> --containers // for all container info also inside a pod
+
+# logs
+kubectl logs nginx
+kubectl logs counter -c count-log-1
+kubectl logs counter --all-containers=true
+kubectl logs -lapp=nginx
+kubectl logs -p -c nginx nginx //  from a previously terminated container within a pod:
+kubectl logs -f -c count-log-1 counter // stream the logs from a container in a pod:
+kubectl logs --tail=20 nginx
+kubectl logs --since=1h nginx
+ubectl logs deployment/nginx -c nginx
+
+# scale
+## Horizontal POD Autoscale 
+kubectl get hpa
+kubectl autoscale deployment/my-nginx --min=1 --max=3
+kubectl autoscale deployment shell --min=2 --max=10 --cpu-percent=50
+-> PA will increase and decrease the number of replicas (via the deployment) to maintain an average CPU utilization across all Pods of 50% (since each pod requests 200 milli-cores by kubectl run, this means average CPU usage of 100 milli-cores). See here for more details on the algorithm.
+-> The Horizontal Pod Autoscaler is implemented as a control loop, with a period controlled by the controller manager’s --horizontal-pod-autoscaler-sync-period flag (with a default value of 15 seconds).
+way to incarese load:  while true; do wget -q -O- http://php-apache.default.svc.cluster.local; done
+
+
+```
+
+By kubectl get hpa.autoscaling.v2alpha1 -o yaml 
+apiVersion: autoscaling/v2alpha1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: php-apache
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    name: php-apache
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 50
+status:
+  observedGeneration: 1
+  lastScaleTime: <some-time>
+  currentReplicas: 1
+  desiredReplicas: 1
+  currentMetrics:
+  - type: Resource
+    resource:
+      name: cpu
+      currentAverageUtilization: 0
+      currentAverageValue: 0
+```
+-> You can also specify resource metrics in terms of direct values, instead of as percentages of the requested value. To do so, use the targetAverageValue field insted of the targetAverageUtilization field.
+-> There are two other types of metrics, both of which are considered custom metrics: pod metrics and object metrics.
+
+
+pod metric -> 
+type: Pods
+pods:
+  metricName: packets-per-second
+  targetAverageValue: 1k
+
+object metric ->
+type: Object
+object:
+  metricName: requests-per-second
+  target:
+    apiVersion: extensions/v1beta1
+    kind: Ingress
+    name: main-route
+  targetValue: 2k
+
+  *** If you provide multiple such metric blocks, the HorizontalPodAutoscaler will consider each metric in turn. The HorizontalPodAutoscaler will calculate proposed replica counts for each metric, and then choose the one with the highest replica count.
+
+
+  example
+
+  ```
+  (on kubectl edit)
+  apiVersion: autoscaling/v2alpha1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: php-apache
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    name: php-apache
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 50
+  - type: Pods
+    pods:
+      metricName: packets-per-second
+      targetAverageValue: k
+  - type: Object
+    object:
+      metricName: requests-per-second
+      target:
+        apiVersion: extensions/v1beta1
+        kind: Ingress
+        name: main-route
+      targetValue: 10k
+status:
+  observedGeneration: 1
+  lastScaleTime: <some-time>
+  currentReplicas: 1
+  desiredReplicas: 1
+  currentMetrics:
+  - type: Resource
+    resource:
+      name: cpu
+      currentAverageUtilization: 0
+      currentAverageValue: 0
+```
+
