@@ -1,0 +1,54 @@
+## ConfigMap
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+   name: reverse-proxy-conf
+data:
+   proxy.conf: |
+     server {
+      listen 80;
+        location / {
+           proxy_pass http://www.google.com;
+         }
+     }
+
+
+## Pod
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-proxy
+  labels:
+    app: nginx-proxy
+spec:
+  containers:
+  - name: nginx-proxy
+    image: nginx
+    ports:
+      - containerPort: 80
+    volumeMounts:
+      - name: config-volume
+        mountPath: /etc/nginx/conf.d/
+  volumes:
+    - name: config-volume
+      configMap:
+        name: reverse-proxy-conf
+
+
+## Service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+spec:
+  selector:
+    app: nginx-proxy
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 80
+  type: NodePort
+
