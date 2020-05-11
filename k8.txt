@@ -20,13 +20,14 @@
 - Init continers (volume mount and data share, with job, with deployment)
 - podpreset 
 - pod-lifecycle, startup prob
-
+- netwoiking fundamentals in pod, CNI, Importance of pause container 
 - container lifecycle events (post start and pre stop) 
-
+ 
 - DaemonSet
 - replication controller and replicaset difference and usecases
 - Assigning Pods to Nodes (nodeSelector)
-- statefulset (volumeClaimTemplates is included pods are not building, also wanted to know how to find cluster domain to determine specific pod by its domain name)
+? - statefulset (volumeClaimTemplates is included pods are not building, also wanted to know how to find cluster domain to determine specific pod by its domain name)
 
 
 
+- ingress
