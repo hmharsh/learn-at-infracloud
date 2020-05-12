@@ -261,7 +261,7 @@ spec:
   containers:
   - name: myapp-container
     image: busybox
-    command: ['sh', '-c', "echo $(MY_VAR) && sleep 3600"]
+    args: ['sh', '-c', "echo $(MY_VAR) && sleep 3600"]
     env:
     - name: MY_VAR
       valueFrom:
@@ -1167,6 +1167,20 @@ spec:
           serviceName: service2
           servicePort: 8080
 
+Ingress controller need to be instaled: eg for nginx
+## Code Examples
+   https://github.com/nginxinc/kubernetes-ingress/tree/master/examples
+## Installation
+   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-0.32.0/deploy/static/provider/baremetal/deploy.yaml
+## Verification
+   kubectl get pods -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx --watch
+## Detact installed version
+   POD_NAMESPACE=ingress-nginx
+   POD_NAME=$(kubectl get pods -n $POD_NAMESPACE -l app.kubernetes.io/name=ingress-nginx -o jsonpath='{.items[0].metadata.name}')
+   kubectl exec -it $POD_NAME -n $POD_NAMESPACE -- /nginx-ingress-controller --version
+
+
+
 
           
 # Way to define a file in configMap          
@@ -1364,3 +1378,13 @@ status:
       currentAverageValue: 0
 ```
 
+::--))
+k delete -f .
+k delete -f yaml_filename
+
+# Helm basics
+helm install example ./mychart --set service.type=NodePort
+helm lint ./mychart 
+helm package ./mychart
+elm install example3 mychart-0.1.0.tgz --set service.type=NodePort
+helm uninstall example
