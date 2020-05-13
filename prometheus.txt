@@ -1,0 +1,181 @@
+# prometheus has its own dashboard called expression browser
+# prometheusQL is the language used to query data in prometheus
+# prometheus ask cAdvisor in kubernetes for all metrices 
+
+# Every time series is uniquely identified by its metric name and optional key-value pairs called labels.
+    <metric name>{<label name>=<label value>, ...}
+# Prometheus installation on kubernetes cluster
+ use (remember to change hostname of kubernetes cluster nodes from config map) -> https://github.com/linuxacademy/content-kubernetes-prometheus-env, explained here https://linuxacademy.com/blog/kubernetes/running-prometheus-on-kubernetes/, Helm can also be use for istallation 
+ Also there are deployment and service to deploy graphana (change password from deployment file 1st)
+
+
+# The Prometheus client libraries offer four core metric types
+Counter, Gauge, Histogram, Summary
+# there are two ways to configure prometheus
+ 1. set command line flags (http://13.232.126.149/flags)
+ 2. config file (http://13.232.126.149/config)
+
+
+Node exporter
+
+```
+ adduser prometheus
+ cd /home/prometheus
+ curl -LO "https://github.com/prometheus/node_exporter/releases/download/v0.16.0/node_exporter-0.16.0.linux-amd64.tar.gz"
+ tar -xvzf node_exporter-0.16.0.linux-amd64.tar.gz
+ mv node_exporter-0.16.0.linux-amd64 node_exporter
+ cd node_exporter
+ chown prometheus:prometheus node_exporter
+
+
+cat <<EOT >> /etc/systemd/system/node_exporter.service
+    [Unit]
+    Description=Node Exporter
+    
+    [Service]
+    User=prometheus
+    ExecStart=/home/prometheus/node_exporter/node_exporter
+    
+    [Install]
+    WantedBy=default.target
+EOT
+systemctl daemon-reload
+systemctl enable --now node_exporter.service
+systemctl status node_exporter.service
+```
+Now check updates in prometheus
+
+
+# Implementing with node.js
+refer: https://github.com/linuxacademy/content-kubernetes-prometheus-app
+-> create api end point in app for timeseries data, in node.js swagger-states 3rd party is a module that gather all applicatrion related data (that comes out on console) and show it on one uri in timeseries formate, also provide a nice UI based dashboard
+-> lets say URI of endpoint is localhost:3000/swagger-stats/metrics
+-> create dockerfile like 
+  ```
+    FROM node:alpine
+    RUN mkdir /var/node
+    WORKDIR /var/node
+    ADD . /var/node
+    RUN npm install
+    EXPOSE 3000
+    CMD npm start
+  ```
+->  push image to dockerhub
+-> now in kubernetes (point the annotations)
+              prometheus.io/scrape: "true"
+              prometheus.io/path: 'swagger-stats/metrics'
+              prometheus.io/port: "3000"
+
+```
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: comicbox-service
+  spec:
+    selector:
+      app: comicbox
+    type: NodePort
+    ports:
+      - port: 3000
+        targetPort: 3000
+        nodePort: 8001
+  ---
+  apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    name: comicbox
+  spec:
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          app: comicbox
+        annotations:
+              prometheus.io/scrape: "true"
+              prometheus.io/path: 'swagger-stats/metrics'
+              prometheus.io/port: "3000"
+      spec:
+        containers:
+          - name: comicbox
+            image: rivethead42/comicbox
+            ports:
+              - containerPort: 3000
+```
+
+
+-> now go to grafana, import swagger-stats (3091) type dashboard on prometheus data and that's, data is live
+
+# PomQL
+4 data types
+
+Instant vector - a set of time series containing a single sample for each time series, all sharing the same timestamp
+Range vector - a set of time series containing a range of data points over time for each time series
+Scalar - a simple numeric floating point value
+String - a simple string value; currently unused
+
+simple filters
+kube_node_status_allocatable_cpu_cores {job="kubernetes-service-endpoints", node="arpitsinghal5c.mylabserver.com" }
+
+kube_node_status_allocatable_cpu_cores {job="kubernetes-service-endpoints"}[5m]
+
+(~ means begain of regex)
+Query job that end with -exporter: -> node_cpu_seconds_total{job=~".*-exporter"}
+Query job that begins with kube: -> container_cpu_load_average_10s{job=~"^kube.*"}
+
+--> (query operators) https://prometheus.io/docs/prometheus/latest/querying/operators/ 
+-> group by 'instance': 
+avg(irate(node_cpu_seconds_total{job="node-exporter", mode="idle"}[5m])) by (instance)
+
+# Rules
+-> just yml files where like
+```
+node_rules.yml: |-
+ groups:
+ - name: node_rules
+   interval: 10s
+   rules:
+     - record: instance:node_cpu:avg_rate5m
+       expr: 100 - avg(irate(node_cpu_seconds_total{job="node-exporter", mode="idle"}[5m])) by (instance) * 100
+     - record: instance:node_memory_usage:percentage
+       expr: ((sum(node_memory_MemTotal_bytes) - sum(node_memory_MemFree_bytes) - sum(node_memory_Buffers_bytes) - sum(node_memory_Cached_bytes)) / sum(node_memory_MemTotal_bytes)) * 100
+     - record: instance:root:node_filesystem_usage:percentage
+       expr: (node_filesystem_size_bytes{mountpoint="/rootfs"} - node_filesystem_free_bytes{mountpoint="/rootfs"}) /node_filesystem_size_bytes{mountpoint="/rootfs"} * 100
+```
+
+Where record is just a unique name and expr is PomQL expression, which keep on recoading in time series formate and we can check this values anytime
+
+Just put this file (refer: https://github.com/linuxacademy/content-kubernetes-prometheus-env/tree/master/readrules)
+-> edit deployment (to mount rule directory), configmap (to add path of rules), and create a new cm with rule file, and apply changes to update running cluster
+
+https://hooks.slack.com/services/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
+
+
+# Alerting rule example:
+
+groups:
+- name: example
+  rules:
+  - alert: HighRequestLatency
+    expr: job:request_latency_seconds:mean5m{job="myjob"} > 0.5  # PomQL
+    for: 10m # look for 10 min after catching and if not resolved, send the alert
+    labels:
+      severity: page
+    annotations:
+      summary: High request latency
+
+ multiple groups can be there in a file as: https://github.com/linuxacademy/content-kubernetes-prometheus-env/blob/master/alertmanager/prometheus-rules-config-map.yml
+
+
+
+ alert to ensure availability of some specific container
+
+      
+      - alert: RedisServerDown
+        expr: redis_up{app="media-redis"} == 0  # scrap(to true) and port in annotation must be set for prometheus to fetch data 
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: Redis Server {{ $labels.instance }} is down!
+      
+
