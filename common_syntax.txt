@@ -1386,5 +1386,11 @@ k delete -f yaml_filename
 helm install example ./mychart --set service.type=NodePort
 helm lint ./mychart 
 helm package ./mychart
-elm install example3 mychart-0.1.0.tgz --set service.type=NodePort
+helm install example3 mychart-0.1.0.tgz --set service.type=NodePort
 helm uninstall example
+
+
+
+
+
+
