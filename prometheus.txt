@@ -303,3 +303,9 @@ Most useful blog for getting relabel config: https://medium.com/quiq-blog/promet
 
 Then, reload the Prometheus configuration:
 $ curl -X POST http://127.0.0.1:9090/-/reload
+
+- Recording and alerting rules exist in a rule group. Rules within a group are run sequentially at a regular interval.
+
+- promtool to check stntax written in yaml before applying those rule 
+  $ go get github.com/prometheus/prometheus/cmd/promtool
+  $ promtool check rules /path/to/example.rules.yml
