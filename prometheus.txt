@@ -1,3 +1,7 @@
+kube_endpoint_address_available
+
+
+
 # prometheus has its own dashboard called expression browser
 # prometheusQL is the language used to query data in prometheus
 # prometheus ask cAdvisor in kubernetes for all metrices 
@@ -117,10 +121,126 @@ simple filters
 kube_node_status_allocatable_cpu_cores {job="kubernetes-service-endpoints", node="arpitsinghal5c.mylabserver.com" }
 
 kube_node_status_allocatable_cpu_cores {job="kubernetes-service-endpoints"}[5m]
+m is range vector selector like (s.m.h,d,w,y)
+The rate() function in Prometheus looks at the history of time series over a time period, and calculates how fast it's increasing per second.
+irate() is the per second rate of change at the end of your range interval. (other is ignored just last two are used)
 
-(~ means begain of regex)
+=: Select labels that are exactly equal to the provided string.
+!=: Select labels that are not equal to the provided string.
+=~: Select labels that regex-match the provided string.
+!~: Select labels that do not regex-match the provided string.
+
+(~ means begain of regex) as below
 Query job that end with -exporter: -> node_cpu_seconds_total{job=~".*-exporter"}
 Query job that begins with kube: -> container_cpu_load_average_10s{job=~"^kube.*"}
+
+
+PomQL cheatsheet: https://timber.io/blog/promql-for-humans
+Examples: 
+  {__name__="go_gc_duration_seconds",}
+  ({__name__=~"[a-z A-Z].*"})
+  node_network_receive_bytes_total{device=~"eth1|lo"}
+  rate(node_cpu_seconds_total {cpu = "0"}[5m]) *2   (operators with scalar*scalar, scalar*vactort, vactor*vactor)
+  vector1 and vector2 results in a vector consisting of the elements of vector1 for which there are elements in vector2
+  http_requests_total offset 5m  -> The offset modifier allows changing the time offset for individual instant and range vectors in a query.
+  sum(http_requests_total{method="GET"} offset 5m) // GOOD.
+  sum(http_requests_total{method="GET"}) offset 5m // INVALID.
+  <aggr-op> [without|by (<label list>)] ([parameter,] <vector expression>) or <aggr-op>([parameter,] <vector expression>) [without|by (<label list>)]
+  sum without (instance) (http_requests_total)
+  sum by (application, group) (http_requests_total)
+  sum by (instance) (node_filesystem_avail_bytes {fstype !="squashfs"} )
+  count_values("version", build_version) or count_values("x", http_request_duration_microseconds)  ==> count the similar values (right coloum) in specific vector (eg http_request_duration_microseconds) and display that count value with name as 1st perameter (eg 'x')
+  topk(6, http_requests_total)
+  absent(some vactor return is dosent return anything) => return value 1
+  absent_over_time ( http_request_duration_microseconds {instance="1244.2.87:9090"}[1h])
+  changes (returns the number of times its value has changed within the provided time range as an instant vector)
+  delta( http_request_duration_microseconds [5m] ) -> difference in first and last value of each time series similarly to 'idelta' which calculate difference b/w last two
+  deriv( http_request_duration_microseconds [5m] )  -> deriavative of timeseries (regression)
+  label_join(http_request_duration_microseconds, "harshit", "-", "instance", "quantile", "kubernetes_io_hostname"  ) // will insert a new label in data named harshit which is equal to concatnation od values "instance", "quantile", "kubernetes_io_hostname" from actual output  saparated by delimiter ("-")
+  label_replace(label_join(http_request_duration_microseconds, "harshit", "-", "instance", "quantile", "kubernetes_io_hostname"  ) , "mahajan", "$1", "harshit", "(.*):.*" )
+  sort(http_requests_total)
+  sort_desc(http_requests_total)
+  sqrt(http_requests_total)
+  time()
+  vector(time()) // return scalar as vector with no label 
+  <aggregation>_over_time() , apply aggregation function on time => eg: count_over_time(http_request_duration_microseconds[5m])
+  subquery: rate(http_requests_total[5m])[30m:1m] => Return the 5-minute rate of the http_requests_total metric for the past 30 minutes, with a resolution of 1 minute.
+  avg by (code) (http_requests_total)
+  sum(http_requests_total) by (instance)
+  sum by  (instance,quantile) (http_request_duration_microseconds)
+  sum by (instance) (up {kubernetes_namespace="monitoring"})
+  metric1 or metric2 or metric3 => (http_request_duration_microseconds or node_memory_Active_bytes)
+
+  HTTP API query (with get/post both),  "resultType": "matrix" | "vector" | "scalar" | "string"
+  URL query parameters:
+
+   query=<string>: Prometheus expression query string.
+   time=<rfc3339 | unix_timestamp>: Evaluation timestamp. Optional.
+   timeout=<duration>: Evaluation timeout. Optional. Defaults to and is capped by the value of the -query.timeout flag.
+
+  http://13.233.147.158/api/v1/query?query=http_requests_total
+  http://13.233.147.158/api/v1/query?query=sum(http_requests_total)
+  http://13.233.147.158/api/v1/query?query=http_requests_total[5m]
+  http://13.233.147.158/api/v1/query?query=up{app="httpd"}
+  http://13.233.147.158/api/v1/query?query=up&time=2020-04-01T20:10:51.781Z --> get result for specific time
+  http://13.233.147.158/api/v1/labels
+  http://13.233.147.158/api/v1/targets and  http://13.233.147.158/api/v1/targets/metadata
+  http://13.233.147.158/api/v1/targets?state=active
+  http://13.233.147.158/api/v1/rules
+  http://13.233.147.158/api/v1/alerts
+  http://13.233.147.158/api/v1/metadata
+  http://13.233.147.158/api/v1/metadata?metric=http_requests_total
+  http://13.233.147.158/api/v1/alertmanagers
+  http://13.233.147.158/api/v1/status/config => configuration file
+  http://13.233.147.158/api/v1/status/flags
+  http://13.233.147.158/api/v1/status/runtimeinfo
+  http://13.233.147.158/api/v1/status/buildinfo
+  http://13.233.147.158/api/v1/status/tsdb // time series database
+  
+
+  Management API
+   http://13.233.147.158/-/ready  // rediness check
+   http://13.233.147.158/-/reload
+   http://13.233.147.158/-/healthy
+   http://13.233.147.158/-/quit
+   
+
+
+  once admin api is enabled by setting --web.enable-admin-api, tsdb snapshot can also be generated by api 
+  POST /api/v1/admin/tsdb/snapshot or
+  PUT /api/v1/admin/tsdb/snapshot
+  // both of this return dabase filename
+
+  deletion of data from timeseries database:  /api/v1/admin/tsdb/delete_series  with conditions specified in parameters
+  clean tombstones:  POST /api/v1/admin/tsdb/clean_tombstones or PUT /api/v1/admin/tsdb/clean_tombstones
+
+
+
+
+
+  
+
+
+
+
+
+
+  curl 'http://localhost:9090/api/v1/query_range?query=up&start=2015-07-01T20:10:30.781Z&end=2015-07-01T20:11:00.781Z&step=15s'
+  curl -g 'http://localhost:9090/api/v1/series?' --data-urlencode 'match[]=up' --data-urlencode 'match[]=process_start_time_seconds{job="prometheus"}'
+
+
+
+
+To understand: 
+  holt_winters
+  histogram_quantile
+  exp
+  deriv
+  clamp_max and clamp_min
+  increase
+  irate and rate
+  
+
 
 --> (query operators) https://prometheus.io/docs/prometheus/latest/querying/operators/ 
 -> group by 'instance': 
@@ -179,3 +299,7 @@ groups:
           summary: Redis Server {{ $labels.instance }} is down!
       
 
+Most useful blog for getting relabel config: https://medium.com/quiq-blog/prometheus-relabeling-tricks-6ae62c56cbda
+
+Then, reload the Prometheus configuration:
+$ curl -X POST http://127.0.0.1:9090/-/reload
