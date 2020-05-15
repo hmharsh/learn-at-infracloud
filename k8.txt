@@ -45,6 +45,20 @@
 - Instrumenting Applications (getting logs from a simple node js application to prometheus using kubernetes annotations, and checking those out in a grafana dashboard)
 
 
+- PomQL from documentation relabel config syntax (Actions like labelmap)
+
+- More experiments with pomql usecases and examples from diffetent blogs available 
+- Querying prometheus using the HTTP API
+
+
+
+
+
+
+
+
+
+
 
 
 
