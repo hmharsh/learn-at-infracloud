@@ -484,6 +484,10 @@ spec:
       restartPolicy: Never
   backoffLimit: 4 // similar to 4 retries on failure before to declare actual failure
 
+## restart policy available values
+ Always, OnFailure, and Never. 
+ 
+ 
   $ kubectl get jobs
   $ kubectl logs <name of pod> // pod still there container is removed
 
