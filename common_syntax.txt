@@ -600,7 +600,7 @@ spec:
       initialDelaySeconds: 5
       periodSeconds: 5
 
-
+Metrics server need to be instaled and working to run this
 # TOP 
 kubectl top pods
 kubectl top pod resource-consumer-big
