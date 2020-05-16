@@ -561,7 +561,7 @@ startupProbe: Indicates whether the application within the Container is started.
 
 ```
 > In Liveness if condition get false container gets restart, 
-but in rediness probe container gets terminated or do not send traffic to that pod
+but in rediness probe if condition get false, container gets terminated or do not send traffic to that pod
 (both have same syntax) 
 ```
 
