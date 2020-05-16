@@ -436,7 +436,7 @@ spec:
  kubectl get pods -l 'environment in (development,production)'
  kubectl get pods -l app=my-app,environment=production
 
- kubectl logs -f -l jobgroup=jobexample
+ kubectl logs -f -l jobgroup=jobexample // -f: for streaming of logs
 
 # Annotation
    => Similar to labels but not intended to be used as selectors, just purpose is to store custom key value pair
