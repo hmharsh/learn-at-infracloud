@@ -1,22 +1,18 @@
 # After Installation
 
-kubectl create –f Tesing_for_Image_pull
-kubectl log Tesing_for_Image_pull
-kubectl create –f py.yaml
-kubectl describe jobs/py
 
-$ kubectl create –f namespace.yml ---------> 1
-$ kubectl get namespace -----------------> 2
-$ kubectl get namespace <Namespace name> ------->3
-$ kubectl describe namespace <Namespace name> ---->4
+# Namespace management
+```
+$ kubectl create –f namespace.yml 
+$ kubectl get namespace 
+$ kubectl get namespace <Namespace name> 
+$ kubectl describe namespace <Namespace name>
 $ kubectl delete namespace <Namespace name>
-
-ClusterIP --> within cluster
-NodePort  --> expose service to static IP and port
-Load Balancer
+```
 
 
 # Replicaset 
+```
       apiVersion: apps/v1
       kind: ReplicaSet
       metadata:
@@ -38,30 +34,29 @@ Load Balancer
             containers:
               - name: nginx
                 image: nginx
+```                
 
-> Replica Set ensures how many replica of pod should be running. 
-  It can be considered as a replacement of replication controller.
-  The key difference between the replica set and the replication controller is,
-  the replication controller only supports equality-based selector 
-  whereas the replica set supports set-based selector.
-> Deployments are upgraded and higher version of replication controller. 
-  They manage the deployment of replica sets which is also an upgraded version of the replication controller. 
-  They have the capability to update the replica set and are also capable of rolling back to the previous version.
+  - Replica Set ensures how many replica of pod should be running, It can be considered as a replacement of replication controller.
+  - The key difference between the replica set and the replication controller is, the replication controller only supports equality-based selector, whereas the replica set supports set-based selector.
+  - Deployments are upgraded and higher version of replication controller. 
+  - They manage the deployment of replica sets which is also an upgraded version of the replication controller. They have the capability to update the replica set and are also capable of rolling back to the previous version.
 
-
+```
 > kubectl create –f Deployment.yaml -–record
 > kubectl get deployments
 > kubectl rollout status deployment/Deployment
 > ubectl set image deployment/Deployment tomcat=tomcat:6.0
 > kubectl rollout undo deployment/Deployment –to-revision=2
+```
 
-Pod -> PVC -> PV -> Host machine
+
+# Pod -> PVC -> PV -> Host machine
 >  kubectl create –f local-01.yaml
 >  kubectl get pv
 >  kubectl get pvc
 >  kubectl describe pv pv0001
 
-
+# More on POD
 ```
 cat << EOF | kubectl create -f -
 apiVersion: v1
@@ -91,12 +86,13 @@ spec:
   restartPolicy: Never
   ```
 
+```
 kubectl get pods
 kubectl get pod <pod name> -O wide // for more imp info in single line 
 kubectl describe pod nginx
 kubectl delete pod nginx
 kubectl get pods --all-namespaces // --all-namespaces is option 
-
+```
 
 ```
 cat << EOF | kubectl create -f -
@@ -140,6 +136,8 @@ spec:
 EOF
 ```
 
+# Deployment
+```
 kubectl get deployments
 kubectl describe deployment nginx-deployment
 kubectl get pods -o wide
@@ -156,10 +154,10 @@ kubectl apply -R -f configs/
 
 // Get a list of system pods running in the cluster (namespace):
 kubectl get pods -n kube-system
-ESOps
-silos
+```
 
-Types of service
+
+# Types of service
  - nodePort
  - ClusterIP
  - LoadBalancer
