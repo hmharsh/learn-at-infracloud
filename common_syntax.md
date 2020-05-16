@@ -1,6 +1,3 @@
-# After Installation
-
-
 # Namespace management
 ```
 $ kubectl create –f namespace.yml 
@@ -173,9 +170,9 @@ spec:
     app: nginx
   ports:
   - protocol: TCP
-    port: 8080 // host port
+    port: 8080 // host port, where pod is running
     targetPort: 80 // container port
-    nodePort: 30080  //You’ll be able to contact the NodePort Service, from outside the cluster, by requesting <NodeIP>:<NodePort>.,  a NodePort in the range of 30000 - 32767 and an internal cluster IP address is assigned to the service.
+    nodePort: 30080  //You’ll be able to contact the NodePort Service, from outside the cluster, by requesting <NodeIP>:<NodePort>.,  a NodePort in the range of 30000 - 32767 and an internal cluster IP address is assigned to the service. specially to expose 
   type: NodePort
 EOF
 ```
