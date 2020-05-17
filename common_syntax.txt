@@ -684,8 +684,8 @@ spec:
       labels:
         app: daemontest
     spec:
-      tolerations:
-        - key: node-role.kubernetes.io/master
+      tolerations: 
+        - key: node-role.kubernetes.io/master  # to make it run on master also
           effect: NoSchedule
       containers:
         - name: nginx
