@@ -658,6 +658,7 @@ kubectl get pod nginx -n nginx-ns -o yaml --export // export only descriptor, no
   - A Pod Preset is capable of modifying the following fields in a Pod spec when appropriate: - The .spec.containers field. - The initContainers field
   - it cal also be disable for specific pod by using podpreset.admission.kubernetes.io/exclude: "true" in pod spec
   - config map and secrets can also be used by podpreset
+ref: https://www.linkedin.com/pulse/kubernetes-deep-dive-part-2-pod-preset-atharva-chauthaiwale/ and official docs
 
 ```
 You have enabled the API type settings.k8s.io/v1alpha1/podpreset. For example, this can be done by including settings.k8s.io/v1alpha1=true in the --runtime-config option for the API server. In minikube add this flag --extra-config=apiserver.runtime-config=settings.k8s.io/v1alpha1=true while starting the cluster.
