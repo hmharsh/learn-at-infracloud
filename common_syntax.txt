@@ -1369,3 +1369,24 @@ kubectl port-forward replicaset/redis-master 7000:6379
 or
 kubectl port-forward service/redis-master 7000:6379
 
+
+Playing with pod lifecycle
+https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event/
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lifecycle-demo
+spec:
+  containers:
+  - name: lifecycle-demo-container
+    image: nginx
+    lifecycle:
+      postStart:
+        exec:
+          command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+      preStop:
+        exec:
+          command: ["/bin/sh","-c","nginx -s quit; while killall -0 nginx; do sleep 1; done"]
+
+```
