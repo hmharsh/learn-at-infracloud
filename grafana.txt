@@ -55,3 +55,7 @@ spec:
 
 # Add prometheus
 > Add data source as prometheus by copying prometheus URL under data source type prometheus
+
+
+--------------------------------------
+### Example dashboard: https://github.com/linuxacademy/content-kubernetes-prometheus-env/blob/master/grafana/dashboard/Kubernetes%20All%20Nodes.json
