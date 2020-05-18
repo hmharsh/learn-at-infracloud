@@ -309,3 +309,8 @@ $ curl -X POST http://127.0.0.1:9090/-/reload
 - promtool to check stntax written in yaml before applying those rule 
   $ go get github.com/prometheus/prometheus/cmd/promtool
   $ promtool check rules /path/to/example.rules.yml
+
+
+
+# Prometheus with node.js app
+https://github.com/linuxacademy/content-kubernetes-prometheus-app
