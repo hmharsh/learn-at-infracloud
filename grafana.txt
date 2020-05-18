@@ -69,4 +69,7 @@ from this file get provisioning path:
 provisioning = <path to config files>
 ```
 where provisioning path filestructute will be like: https://grafana.com/tutorials/provision-dashboards-and-data-sources/#3
+eg path(maybe relative): /usr/share/grafana/conf/provisioning(/dashboards/sample.yaml)
+now this directory will be used for configuration as code
+
 
