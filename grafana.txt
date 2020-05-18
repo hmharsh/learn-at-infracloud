@@ -59,6 +59,7 @@ spec:
 
 --------------------------------------
 ### Example dashboard: https://github.com/linuxacademy/content-kubernetes-prometheus-env/blob/master/grafana/dashboard/Kubernetes%20All%20Nodes.json
+dashboard json elements documentation: https://grafana.com/docs/grafana/latest/reference/dashboard/
 
 # find configuration file
 based on installation type find configuration file path from https://grafana.com/docs/grafana/latest/installation/configuration/
