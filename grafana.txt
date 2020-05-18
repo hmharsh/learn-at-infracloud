@@ -1,0 +1,57 @@
+
+# deployment:
+```
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+    component: core
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: grafana
+        component: core
+    spec:
+      containers:
+        - image: grafana/grafana:3.1.1
+          name: grafana
+          env:
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: password
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+          - name: grafana-persistent-storage
+            mountPath: /var
+      volumes:
+      - name: grafana-persistent-storage
+        emptyDir: {}
+        
+```        
+ 
+# service
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-service
+  namespace: monitoring
+
+spec:
+  selector:
+    app: grafana
+  type: NodePort
+  ports:
+    - port: 3000
+      targetPort: 3000
+      nodePort: 8000
+```
+
+# Add prometheus
+> Add data source as prometheus by copying prometheus URL under data source type prometheus
