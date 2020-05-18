@@ -70,6 +70,10 @@ provisioning = <path to config files>
 ```
 where provisioning path filestructute will be like: https://grafana.com/tutorials/provision-dashboards-and-data-sources/#3
 eg path(maybe relative): /usr/share/grafana/conf/provisioning(/dashboards/sample.yaml)
-now this directory will be used for configuration as code
+now this directory will be used for configuration as code to provision new datasource, dashboard or notifiers
 
+
+```
+If you don’t specify an id in the dashboard definition, then Grafana assigns one during provisioning. You can set the id yourself if you want to reference the dashboard from other dashboards. Be careful to not use the same id for multiple dashboards, as this will cause a conflict.
+```
 
