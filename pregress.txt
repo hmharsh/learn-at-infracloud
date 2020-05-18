@@ -51,6 +51,14 @@
 - Querying prometheus using the HTTP API
 
 
+- Revision of kubernetes on weekend, which clerify some complex concepts now (like podpreset)
+
+- Grafana setup/adding datasource both manually and by configuration by using "configuration as code" tutotial from grafana (under docs)
+- explore grafana and creating dashboard from PromQL, playlist, users and organization, configuring alert (configured one for slack)
+- understood the fields of json corrorponding to dashboard (https://grafana.com/docs/grafana/latest/reference/dashboard/) 
+- grafana-cli (which has very limited options now)
+- all 3 citadel assignments
+
 
 
 
