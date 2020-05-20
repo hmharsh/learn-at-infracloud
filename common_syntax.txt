@@ -5,6 +5,18 @@ $ kubectl get namespace
 $ kubectl get namespace <Namespace name> 
 $ kubectl describe namespace <Namespace name>
 $ kubectl delete namespace <Namespace name>
+
+```
+
+sample namespace
+```
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: datastore
+  labels:
+    name: datastore
+
 ```
 
 
