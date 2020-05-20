@@ -315,3 +315,4 @@ $ curl -X POST http://127.0.0.1:9090/-/reload
 # Prometheus with node.js app
 https://github.com/linuxacademy/content-kubernetes-prometheus-app
 all steps of instrumention (connecting with node.js app will grafana): https://www.youtube.com/watch?time_continue=642&v=m2zM3zOZl34&feature=emb_logo
+doc of prom-client npm library: https://github.com/siimon/prom-client
