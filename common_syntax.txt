@@ -1238,7 +1238,8 @@ ubectl logs deployment/nginx -c nginx
 ## Horizontal POD Autoscale 
 kubectl get hpa
 kubectl autoscale deployment/my-nginx --min=1 --max=3
-kubectl autoscale deployment shell --min=2 --max=10 --cpu-percent=50
+kubectl autoscale deployment dep_shell --min=2 --max=10 --cpu-percent=50
+(https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/)
 -> PA will increase and decrease the number of replicas (via the deployment) to maintain an average CPU utilization across all Pods of 50% (since each pod requests 200 milli-cores by kubectl run, this means average CPU usage of 100 milli-cores). See here for more details on the algorithm.
 -> The Horizontal Pod Autoscaler is implemented as a control loop, with a period controlled by the controller manager’s --horizontal-pod-autoscaler-sync-period flag (with a default value of 15 seconds).
 way to incarese load:  while true; do wget -q -O- http://php-apache.default.svc.cluster.local; done
