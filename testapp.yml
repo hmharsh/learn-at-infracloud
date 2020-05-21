@@ -80,7 +80,7 @@ metadata:
   namespace: datastoreapp
 spec:
   selector:
-    app: datastore-mongo
+    app: mongo
   ports:
   - protocol: TCP
     port: 27017
