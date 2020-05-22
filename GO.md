@@ -233,18 +233,22 @@ func main(){
 by using `type MyFloat float64` methods can be applied to non struct objects too
 
 # Interface
+
 ```
 An interface type is defined as a set of method signatures.
 
 A value of interface type can hold any value that implements those methods.
 ```
-``` 
+
+
 Interface
 ```
 type I interface {
 	M()
 } 
 ```
+
+
 Implimentation: 
 ```
     // Way: 1
