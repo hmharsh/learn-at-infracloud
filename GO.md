@@ -434,7 +434,7 @@ func main(){
 
 ## using channel for synchronization 
  https://gobyexample.com/channel-synchronization
- 
+
 
 ## Chennel with buffer
 ```
@@ -580,4 +580,5 @@ cobra init --pkg-name github.com/hmarsh/myapp myapp
 github.com/hmarsh/myapp: path after src
 myapp: relative path of where to generate app directory 
 
-# embedding types: concept => https://travix.io/type-embedding-in-go-ba40dd4264df
+# embedding types: 
+  concept => https://travix.io/type-embedding-in-go-ba40dd4264df
