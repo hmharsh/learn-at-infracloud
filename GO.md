@@ -451,7 +451,17 @@ func main(){
   close(ch) from senders side to let reciver (specially range loop) know
   https://tour.golang.org/concurrency/4 
   `v, ok := <-ch`
+  Ok will be false if chennal is closed
 
+```
+
+## ranging on channel
+range will return only value, unlike array (index,value)
+```
+// queue is name of channel
+for elem := range queue {
+		fmt.Println(elem)
+	}
 ```
 func main(){
 	ch := make(chan int, 2)	
@@ -464,6 +474,29 @@ func main(){
 }
 ```
 
+
+# direction with channel
+```
+package main
+import (
+        "fmt"
+        "time"
+)
+func send(a chan<-string){ // to specify direction <-,  simply it can also be, func send(a chan string){
+  msg:="message"
+  a <- msg
+}
+func recive(a <-chan string){ // arrow is before chan <-chan string
+        msg := <-a
+        fmt.Println(msg)
+}
+func main(){
+  b:= make(chan string)
+  go  send(b)
+  go  recive(b)
+  time.Sleep(time.Second)
+}
+```
 # Select
 default section can also be used with select: https://tour.golang.org/concurrency/6
 ```
@@ -488,6 +521,19 @@ func say(n int,s string, ch chan int){
 }
 ```
 
+## Make select to timeout 
+after specific timeout `Add extra case`
+either use timeout or use default case for Non-Blocking Channel Operations (to proceed further even if no data is recived)
+
+
+```
+select {
+    case res := <-c1:
+        fmt.Println(res)
+    case <-time.After(1 * time.Second):
+        fmt.Println("timeout 1")
+    }
+```
 # Mutex
 lock or unlock any specific data structure to be updated 
 
@@ -559,6 +605,8 @@ func main(){
 	fmt.Println(name)
 }
 ```
+
+
 
 # Install external packages
 go get github.com/spf13/cobra
