@@ -331,7 +331,7 @@ if err != nil {
 fmt.Println("Converted integer:", i)
 ```
 
-## Example (also refer: https://medium.com/rungo/error-handling-in-go-f0125de052f0)
+ Example (also refer: https://medium.com/rungo/error-handling-in-go-f0125de052f0)
 ```
 package main
 
