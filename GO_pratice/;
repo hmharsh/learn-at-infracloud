@@ -1,0 +1,12 @@
+package main
+import (
+	"fmt"
+	"error"
+       )
+
+
+
+func main(){
+  fmt.Println("Hello")
+  errors.New("test error")
+}
