@@ -2,7 +2,7 @@
 
 
 - `For any kind of datatype (primary or secondary) if method named "Error() string" is created (using method feature), now if that object is printed using fmt.Println(), this Error method will be called and return value (string) of this Error() method wll be printed out
-error handeling can be done is this Error function()`
+Error handeling can be done is this Error function()`
 
 - errors is external library used to define simple errors
 
