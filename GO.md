@@ -1,4 +1,5 @@
 # Installing and setting up GO
+CP: (https://www.codementor.io/@tucnak/using-golang-for-competitive-programming-h8lhvxzt3)
 ```
 sudo su
 wget https://dl.google.com/go/go1.14.3.linux-amd64.tar.gz
@@ -261,4 +262,322 @@ Implimentation:
 	i.M()
 ```
 
+Whatever the way interface is implemented, Interface values can be thought of as a tuple of a value and a concrete type: 
+` as (value, type) eg: (3.141592653589793, main.F) `
 
+
+# Type switches
+```
+func do(i interface{}) {
+	switch v := i.(type) {
+	case int:
+		fmt.Printf("Twice %T %v is %v\n", v,v, v*2)
+	case string:
+		fmt.Printf("%q is %v bytes long\n", v, len(v))
+	default:
+		fmt.Printf("I don't know about type %T!\n", v)
+	}
+}
+
+func main() {
+	do(21)
+	do("hello")
+	do(true)
+}
+```
+
+
+# Stringers
+```
+func (p person) String() string{
+   return (fmt.Sprintf("name: %v and age %v",p.name,p.age))  //Sprintf for string print
+}
+```
+
+# Error Handeling 
+
+==> For any kind of datatype (primary or secondary) if method named "Error() string" is created (using method feature), now if that object is printed using fmt.Println(), this Error method will be called and return value (string) of this Error() method wll be printed out
+error handeling can be done is this Error function()
+Example:
+```
+package main
+import (
+        "fmt"
+//        "errors"
+       )
+
+type A int
+func (a A) Error() string{
+return "Eerroorr"
+}
+
+func main(){
+  var a A
+  a=1
+  fmt.Println(a)
+//  e:=errors.New("test error")
+//  fmt.Println(e)
+}
+```
+
+
+using something like "err != nil" 
+```
+i, err := strconv.Atoi("42")
+if err != nil {
+    fmt.Printf("couldn't convert number: %v\n", err)
+    return
+}
+fmt.Println("Converted integer:", i)
+```
+
+## Example (also refer: https://medium.com/rungo/error-handling-in-go-f0125de052f0)
+```
+package main
+
+import (
+	"fmt"
+)
+
+type ErrNegativeSqrt float64
+
+
+func (e ErrNegativeSqrt) Error() string{
+    v:=fmt.Sprint(float64(e))
+	return (fmt.Sprintf("cannot Sqrt negative number: %v", v))
+}
+
+
+func Sqrt(x float64) (float64, error) {
+    if(x<0){
+	 y:=ErrNegativeSqrt(x)
+	 return 0,y 
+	}
+    var z float64 = 1.0
+    for i:= 0; i<10 ; i++ {
+    z -= (z*z - x) / (2*z)
+	}
+	return z, nil
+}
+
+func main() {
+	fmt.Println(Sqrt(2))
+	fmt.Println(Sqrt(-2))
+	/*i, err := Sqrt(-2)
+	if(err !=nil) {
+	  fmt.Printf(err)
+	  return
+	}	
+	fmt.Println(i)*/
+}
+
+```
+
+# Reader
+```
+    r := strings.NewReader("Hello, Reader!")
+
+	b := make([]byte, 8)
+	fmt.Printf("%v\n",b)
+	for {
+		n, err := r.Read(b)
+		fmt.Printf("n = %v err = %v b = %v\n", n, err, b)
+		fmt.Printf("b[:] = %q\n", b[:n])
+		if err == io.EOF {
+			break
+		}
+	}
+```	
+
+# goroutine 
+## To start a new thread, use go prefix with specific line of function call 
+    go f(x, y, z)
+
+# chennels
+ 	ch := make(chan int)
+	 ch <- v  
+	 v := <-ch  
+## Example
+```
+package main
+import ("fmt")
+func put(i int, ch chan int){
+	ch <- i
+}
+func get(ch chan int) int{
+	v := <-ch 
+	return v
+}
+func main(){
+	ch := make(chan int)
+	go put(25,ch)
+	v:=get(ch)
+	fmt.Println(v)
+}
+```
+## channel example 2
+```
+package main
+import "fmt"
+func main(){
+        message := make(chan string)
+        go func(a string){
+        message <- a
+        message <- "ab"
+        }("hii i am harshit")
+        msg1 := <-message
+        fmt.Println(msg1)
+        msg2 := <-message
+        fmt.Println(msg2)
+}
+```
+
+## using channel for synchronization 
+ https://gobyexample.com/channel-synchronization
+ 
+
+## Chennel with buffer
+```
+func main(){
+	ch := make(chan int, 2)	
+	ch <- 10
+	ch <-  20
+	fmt.Println( <-ch)
+	fmt.Println( <-ch)	
+}
+```
+
+## closing chennal is imp
+  close(ch) from senders side to let reciver (specially range loop) know
+  https://tour.golang.org/concurrency/4 
+  `v, ok := <-ch`
+
+```
+func main(){
+	ch := make(chan int, 2)	
+	ch <- 10
+	close(ch)
+	//ch <-  20
+	fmt.Println( <-ch)
+	x,OK := <-ch
+	fmt.Println(x,OK)
+}
+```
+
+# Select
+default section can also be used with select: https://tour.golang.org/concurrency/6
+```
+package main
+import ("fmt")
+
+func main(){
+n:=5
+ch := make(chan int)	
+go say(n,"h", ch)
+for i:=0; i<=n;i++{
+select {
+case msg1:= <- ch:
+	fmt.Println(msg1)
+   }// select
+ } // for loop
+} // main function
+func say(n int,s string, ch chan int){
+ for i:=0;i<=n;i++{
+    ch <- i
+ }
+}
+```
+
+# Mutex
+lock or unlock any specific data structure to be updated 
+
+# Input
+
+```
+package main
+import (
+	"fmt"
+	"os"
+	"bufio"
+	"strings"
+)
+func main(){
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("Enter your name")
+	name,_  := reader.ReadString('\n')
+	name = strings.Replace(name, "\n", "", -1)
+	fmt.Printf("\n your name is %v, hii \n", name)
+}
+```
+
+# Write to a file
+Different Approaches like: ioutil, os.openfile and using writefile function
+ioutil one is:
+```
+package main
+import (
+	"io/ioutil"
+	"log"
+)
+func main(){
+	var data_to_write string
+	data_to_write = "hello this is harshit mahajan"
+	err := ioutil.WriteFile("/etc/hhhhh", []byte(data_to_write), 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+```
+
+# Custom exit code
+  os.Exit(0)
+
+# CLI options 
+accepting command line arguments
+
+```
+package main
+import (
+	"fmt"
+	"flag"
+	"os"
+)
+func main(){
+	// declaring variables
+	var name string
+	// defining flags
+	flag.StringVar(&name,"my_name","harshit","name to be used")   // now call this go code with --my_name=... ,similarly other data type can be used like boolVar
+	//read from cli and copy into variable whose address is &address
+	flag.Parse()
+	// if wrong input is provided, in condition check for valid argument
+	if(false){
+	flag.Usage()
+	os.Exit(1)
+	}
+	// conditionally read from stdin: read input conditinally
+	// print out the input
+	fmt.Println(name)
+}
+```
+
+# Install external packages
+go get github.com/spf13/cobra
+go get -u github.com/spf13/cobra/cobra (also intstall binary if present)
+-u : also installed dependencies of external library
+
+go get: to install somebody else code
+go install: package all code in a binary under bin directory(for own code)
+
+
+# build for windows
+GOOS=windows go build // generate exe file in current dir, GOOS and GOARCH can be defined
+(some values: https://golang.org/cmd/go/#hdr-Environment_variables)
+(all values: https://golang.org/doc/install/source#environment)
+darwin is for mac os
+# cobra 
+is a framework to scaffold package structure 
+cobra init --pkg-name github.com/hmarsh/myapp myapp
+github.com/hmarsh/myapp: path after src
+myapp: relative path of where to generate app directory 
+
+# embedding types: concept => https://travix.io/type-embedding-in-go-ba40dd4264df
