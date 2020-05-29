@@ -919,3 +919,111 @@ https://gobyexample.com/random-numbers
 - net, net/url, `u, err := url.Parse("url")`  https://gobyexample.com/url-parsing
 - crypto/sha1: convert any string or data into sha1 hash  https://gobyexample.com/sha1-hashes
 - base64 encoding/decoding
+
+
+
+# File handeling
+```
+import (
+    "bufio"
+    "fmt"
+    "io"
+    "io/ioutil"
+    "os"
+)
+```
+3 ways to read a file
+- 1. dat, err := ioutil.ReadFile("/tmp/dat") // string(dat) contains file content 
+- 2. f, err := os.Open("/tmp/dat") 
+     b1 := make([]byte, 5)
+     n1, err := f.Read(b1)
+     fmt.Printf("%v\n", string(b2[:n2]))
+     // o3, err := f.Seek(6, 0), 
+     // seek function takes two arguments: 
+     // 1st relative location from where to read which may be negative
+     // 2nd [0,1,2] 0 means start from file start, 1 means start from current pointer location, 2 means pointer at the end of the file
+     // seek(-2,2) last two bytes of file
+- 3. r4 := bufio.NewReader(f)
+     b4, err := r4.Peek(5)
+     fmt.Printf("5 bytes: %s\n", string(b4))
+
+
+
+3 way to write to a file (https://gobyexample.com/writing-files)
+- 1. d1 := []byte("hello\ngo\n")
+     err := ioutil.WriteFile("/tmp/dat1", d1, 0644)
+- 2. f, err := os.Create("/tmp/dat2")
+     defer f.Close()
+     d2 := []byte{115, 111, 109, 101, 10}
+     n2, err := f.Write(d2)
+     f.Sync() // Issue a Sync to flush writes to stable storage.
+- 3. w := bufio.NewWriter(f)
+     n4, err := w.WriteString("buffered\n")
+     w.Flush() // Use Flush to ensure all buffered operations have been applied to the underlying writer.
+
+
+# path/filepath
+(https://gobyexample.com/file-paths)
+For generic path related operation like concatinating path, 
+    finding and checking absolue or relative path,
+    finding extension from filepath 
+    saparating filename and dir path from a path
+    generating relative path (by using absolute path and current path)
+
+# directory
+creation ->  err := os.Mkdir("subdir", 0755)
+deletion ->  os.RemoveAll("subdir")
+directory hierarchy creation -> err = os.MkdirAll("subdir/parent/child", 0755)
+change directory -> err = os.Chdir("subdir/parent/child")
+read directory -> c, err := ioutil.ReadDir(".") // . is relative path to path set by change directory
+now traverse over c by using 
+
+```
+    for _, entry := range c {
+        fmt.Println(" ", entry.Name(), entry.IsDir())
+    }
+```
+
+# tmp
+To create/delete file/dir to default tmp location with random temp name (https://gobyexample.com/temporary-files-and-directories)
+
+# testing library
+just import the "testing", now when the name of function start with Test (like TestIntMinBasic), this sunction called automatically tested
+also t.Run(testname, func(){}) can be used to run test
+(https://github.com/infracloudio/citadel/tree/master/go#concurrency-controls)
+
+# command line: https://gobyexample.com/command-line-flags
+   args: os.Args
+   flags: import ("flag")
+          wordPtr := flag.String("word", "foo", "a string")
+          flag.Parse()
+          fmt.Println("word:", *wordPtr)
+   subcommands: https://gobyexample.com/command-line-subcommands
+
+# Env var
+os.Setenv("FOO", "1")   
+fmt.Println("FOO:", os.Getenv("FOO"))
+
+// get all enc var
+```
+for _, e := range os.Environ() {
+        pair := strings.SplitN(e, "=", 2)
+        fmt.Println(pair[0])
+}
+```
+
+
+# http clients and server 
+https://gobyexample.com/http-clients
+https://gobyexample.com/http-servers
+context: helpful in error handeling (handel if something goes wrong): https://gobyexample.com/context
+(can be used anywhere not only with http)
+
+
+# Exit
+// defers will not be run when using os.Exit
+os.Exit(3) // 3 is the exit code
+
+# process
+https://gobyexample.com/spawning-processes
+
