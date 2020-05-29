@@ -331,7 +331,7 @@ if err != nil {
 fmt.Println("Converted integer:", i)
 ```
 
- Example (also refer: https://medium.com/rungo/error-handling-in-go-f0125de052f0)
+## Example (also refer: https://medium.com/rungo/error-handling-in-go-f0125de052f0)
 ```
 package main
 
@@ -536,7 +536,39 @@ select {
 ```
 # Mutex
 lock or unlock any specific data structure to be updated 
+simple way to implement Mutex
+```
+package main
 
+import (
+        "fmt"
+        "sync"
+        "time"
+)
+
+type age struct {
+        years int
+        mux   sync.Mutex
+}
+
+func (a *age) inc() {
+        a.mux.Lock()
+        a.years = a.years + 1
+        a.mux.Unlock()
+}
+func main() {
+        fmt.Println("Hello")
+        me := age{years: 1}
+
+        fmt.Println(me)
+        for i := 0; i < 20; i++ {
+                go me.inc()
+        }
+        time.Sleep(time.Second)
+        fmt.Println(me)
+
+}
+```
 # Input
 
 ```
@@ -630,3 +662,260 @@ myapp: relative path of where to generate app directory
 
 # embedding types: 
   concept => https://travix.io/type-embedding-in-go-ba40dd4264df
+
+
+# Timer
+```
+func main() {
+        fmt.Println(time.Now())
+        t1 := time.NewTimer(2 * time.Second)
+        x := t1.Stop()
+        //      <-t1.C
+        fmt.Println(x)
+}
+```
+
+# Ticker
+```
+func test() {
+        fmt.Println("Task1")
+        fmt.Println("Task2")
+        fmt.Println("Task3")
+}
+func main() {
+        done := make(chan bool)
+        t1 := time.NewTicker(2 * time.Second)
+        go func() {
+                for {
+                        select {
+                        case <-t1.C:
+                                test()
+                        case <-done:
+                                return
+                        }
+                }
+        }()
+        time.Sleep(7 * time.Second)
+        t1.Stop()
+        done <- true
+}
+```
+
+
+# Worker
+```
+func worker(id int, job <-chan int, result chan<- int) {
+        for r := range job {
+                r = r * 2
+                result <- r
+        }
+}
+func main() {
+        fmt.Println("Hello")
+        job := make(chan int, 5)
+        result := make(chan int, 5)
+        for i := 0; i < 3; i++ {
+                go worker(i, job, result)
+        }
+        for j := 0; j < 2; j++ {
+                job <- j
+        }
+        close(job)
+        for r := range result {
+                //for j := 0; j < 2; j++ {
+                fmt.Println(r)
+        }
+
+        close(result)
+}
+```
+
+# Limiter
+```
+func main() {
+
+        requests := make(chan int, 5)
+        for i := 1; i <= 5; i++ {
+                requests <- i
+        }
+        close(requests)
+
+        limiter := time.Tick(1 * time.Second)
+
+        for req := range requests {
+                <-limiter
+                fmt.Println("request", req, time.Now())
+        }
+}
+```
+
+
+# Wait group and Atomic counter
+
+```
+package main
+import (
+        "fmt"
+        "sync"
+        "sync/atomic"
+)
+func main() {
+        var wg sync.WaitGroup
+        var count uint64
+        for i := 1; i <= 100; i++ {
+                wg.Add(1)
+                go func() {
+                        for j := 1; j <= 10; j++ {
+                                atomic.AddUint64(&count, 1)
+                        }
+
+                        wg.Done()
+                }()
+        }
+        wg.Wait()
+        fmt.Println(count)
+}
+```
+
+# Stateful goroutines
+to synchronize access to shared state across multiple goroutines. its Another option than using mutex
+-  This channel-based approach aligns with Go’s ideas of sharing memory 
+   by communicating and having each piece of data owned by exactly 1 goroutine.
+   (use by implementing channel in struct)
+
+
+# sorting
+```
+package main
+
+import (
+        "fmt"
+        "sort"
+)
+
+func main() {
+        str := []string{"ab", "aa", "d", "z"}
+        sort.Strings(str)
+        fmt.Println(str)
+
+        list := []int{1, 2, 3}
+        sort.Ints(list)
+        fmt.Println(list)
+}
+```
+For custom sort logic (like sort by lengh of string etc) implement the Len, Swap and Less method with that customised data type, 
+the actual comparision logic will reside under Less (https://gobyexample.com/sorting-by-functions)
+
+
+
+# Panic
+generate panic by
+`panic(err)`
+
+# collection functions:
+https://gobyexample.com/collection-functions
+
+# string functions:
+https://gobyexample.com/string-functions
+
+# Fprintf()
+ You can format+print to io.Writers other than os.Stdout using Fprintf.
+ e.g.: fmt.Fprintf(os.Stderr, "an %s\n", "error")
+
+# regexp library
+ match, _ := regexp.MatchString("p([a-z]+)ch", "peach")
+ https://gobyexample.com/regular-expressions
+
+ # JSON
+ import ("encoding/json")
+
+    mapD := map[string]int{"apple": 5, "lettuce": 7}
+    mapB, _ := json.Marshal(mapD)
+# Time
+https://gobyexample.com/time
+```
+package main
+
+import (
+        "fmt"
+        "time"
+)
+func main() {
+        p := fmt.Println
+        p("Hello")
+        //      now := time.Now()
+
+        // 2020-05-28 17:53:09.8811694 +0530 IST m=+0.001759601
+        //want (int, time.Month, int, int, int, int, int, *time.Location)
+        // 2009, 11, 17, 20, 34, 58, 651387237, time.UTC)
+
+        /*
+           p(then.Year())
+           p(then.Month())
+           p(then.Day())
+           p(then.Hour())
+           p(then.Minute())
+           p(then.Second())
+           p(then.Nanosecond())
+           p(then.Location())
+
+        */
+		/*
+		fmt.Printf("%d-%02d-%02dT%02d:%02d:%02d-00:00\n",
+        t.Year(), t.Month(), t.Day(),
+        t.Hour(), t.Minute(), t.Second())
+		*/
+        than1 := time.Date(2020, 05, 28, 14, 53, 9, 8811694, time.UTC)
+        than2 := time.Date(2020, 05, 28, 15, 53, 9, 8811694, time.UTC)
+        p(than2)
+        p(than1)
+        diff := than1.Sub(than2)
+        fmt.Println(diff)
+}
+```
+
+time -> epoch 
+```
+  now := time.Now()
+  secs := now.Unix()  // time.now().Unix()
+  nanos := now.UnixNano()
+```
+and 
+epoch to time
+```
+    time.Unix(secs, 0)
+    time.Unix(0, nanos)
+```
+https://gobyexample.com/epoch
+
+# formatting and parsing time
+https://gobyexample.com/time-formatting-parsing
+```
+package main
+import (
+	"fmt"
+	"time"
+)
+func main() {
+	p := fmt.Println
+	t := time.Now()
+	p(time.Now())
+	p(time.RFC3339)
+	p(t.Format("02/01/2006"))  // formate value of t according to supplied formate
+	form := "3 04 PM"
+	t2, _ := time.Parse(form, "8 41 PM")  // formate, time
+	p(t2)
+}
+```
+
+# Random
+math/rand 
+`mt.Print(rand.Intn(100))`
+generate int float random number
+apply seed to generate eandom numbers
+https://gobyexample.com/random-numbers
+
+- library strcnv convert string to numbers (int, float etc) `strconv.ParseFloat("1.234", 64)`, with base 10 `strconv.Atoi("135")` 
+- net, net/url, `u, err := url.Parse("url")`  https://gobyexample.com/url-parsing
+- crypto/sha1: convert any string or data into sha1 hash  https://gobyexample.com/sha1-hashes
+- base64 encoding/decoding
