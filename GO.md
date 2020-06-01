@@ -1029,4 +1029,9 @@ https://gobyexample.com/spawning-processes
 
 
 # Go modules
+go mod init
+go mod tidy 
+go list 
+go list -m all
+
 https://blog.golang.org/using-go-modules
