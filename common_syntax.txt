@@ -809,8 +809,10 @@ kubectl get nodes --show-labels
 
 
 
-# API in kubernetes (2 simple ways, also programing langiage specific libraries are also there)
+# REST API in kubernetes (2 simple ways, also programing langiage specific libraries are also there)
 REF: https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/
+
+(for more info in deep 4 part series on medium.com "Building stuff with the Kubernetes API" this is just 1st part)
 1. Using kubectl proxy
     kubectl proxy --port=8080
     curl http://localhost:8080/api/ (similarly all api can be used as documented at https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/)
