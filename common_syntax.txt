@@ -862,7 +862,7 @@ REF: https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/
       ```
 
 ```
-cloud_user@arpitsinghal2c:~/kubernates/excersice/rbac$ k get clusterrole cluster-admin -o yaml
+cloud_user@harshit:~/kubernates/excersice/rbac$ k get clusterrole cluster-admin -o yaml
   apiVersion: rbac.authorization.k8s.io/v1
   kind: ClusterRole
   metadata:
