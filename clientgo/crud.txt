@@ -1,3 +1,9 @@
 ## crud example is working from here perfactly, just select the right release branch (9.0 for kubernetes 1.12)
 https://github.com/kubernetes/client-go/blob/release-9.0/examples/create-update-delete-deployment/main.go
 creating deployment: https://github.com/hossainemruz/k8s-client-go-practice/blob/56eeb12f1ce54d3fe4d428e7546d70cd5bde3b50/main.go#L40
+pod using client-go more fileds: https://github.com/timoreimann/kubernetes-goclient-example/blob/master/operation.go
+
+
+informers: 
+Informative: https://medium.com/@muhammet.arslan/write-your-own-kubernetes-controller-with-informers-9920e8ab6f84
+code: https://gianarb.it/blog/kubernetes-shared-informer
