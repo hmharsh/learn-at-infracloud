@@ -7,11 +7,13 @@ import (
     v1 "k8s.io/api/core/v1"
     "k8s.io/client-go/kubernetes"
     "os"
-//  "context"
-//  apiv1 "k8s.io/api/core/v1"
+//    "context"
+//   apiv1 "k8s.io/api/core/v1"
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 )
+
+// proper example at: https://github.com/vladimirvivien/k8s-client-examples/blob/master/go/pvcwatch/main.go
 func main() {
     kubeconfig := filepath.Join(
          os.Getenv("HOME"), ".kube", "config",
@@ -27,7 +29,26 @@ func main() {
     api := clientset.CoreV1() // check which one we need to use from struct defination of clientset here https://github.com/kubernetes/client-go/blob/master/kubernetes/clientset.go#L113
     listOptions := metav1.ListOptions{
     }
-    pvcs, err := api.PersistentVolumeClaims("default").List(listOptions)
+    pvcs, err := api.PersistentVolumeClaims("default").List(listOptions) // default namsepace
+    watcher, err :=api.PersistentVolumeClaims("default").Watch(listOptions)
+    ch := watcher.ResultChan()
+    for event := range ch {
+        pvc, OK := event.Object.(*v1.PersistentVolumeClaim)
+//        fmt.Println(pvc)
+        fmt.Println(pvc.Spec)
+        x:=pvc.Spec.Resources.Requests["storage"]
+        fmt.Println("\n",x.String())
+        fmt.Println("\n",OK,"\n", event.Type)
+    }
+
+
+
+
+
+    pods, err := api.Pods("default").List(listOptions) //  more functions with api(Corev1) https://godoc.org/k8s.io/client-go/kubernetes/typed/core/v1
+    for _, pod := range pods.Items {
+    fmt.Println("\n",pod.Name)
+    }
     printPVCs(pvcs)
 }
 
