@@ -44,9 +44,9 @@ func main() {
 
 
 
-
+    // All API including v1: https://godoc.org/k8s.io/api
     pods, err := api.Pods("default").List(listOptions) //  more functions with api(Corev1) https://godoc.org/k8s.io/client-go/kubernetes/typed/core/v1
-    for _, pod := range pods.Items {
+    for _, pod := range pods.Items {                 
     fmt.Println("\n",pod.Name)
     }
     printPVCs(pvcs)
