@@ -7,3 +7,4 @@ pod using client-go more fileds: https://github.com/timoreimann/kubernetes-gocli
 informers: 
 Informative: https://medium.com/@muhammet.arslan/write-your-own-kubernetes-controller-with-informers-9920e8ab6f84
 code: https://gianarb.it/blog/kubernetes-shared-informer
+a different way calling from cache: https://github.com/vishal-biyani/kubernetes-days-india/blob/master/informer.go
