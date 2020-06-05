@@ -1,0 +1,2 @@
+## crud example is working from here perfactly, just select the right release branch (9.0 for kubernetes 1.12)
+https://github.com/kubernetes/client-go/blob/release-9.0/examples/create-update-delete-deployment/main.go
