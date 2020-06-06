@@ -3,7 +3,8 @@
 [Docker-Instalation](#Docker-Instalation)
 
 # Cluster Installation (Ubuntu)
-
+### WSL
+https://medium.com/@joaoh82/setting-up-kubernetes-on-wsl-to-work-with-minikube-on-windows-10-90dac3c72fa1
 ### Docker-Instalation
 ```
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
