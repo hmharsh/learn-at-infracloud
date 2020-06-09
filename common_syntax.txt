@@ -1423,3 +1423,8 @@ spec:
           command: ["/bin/sh","-c","nginx -s quit; while killall -0 nginx; do sleep 1; done"]
 
 ```
+
+
+# customize the kubectl output using jsonpath
+kubectl get pods -o=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.startTime}{"\n"}{end}'
+ref: https://kubernetes.io/docs/reference/kubectl/jsonpath/
