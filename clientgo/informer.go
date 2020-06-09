@@ -5,7 +5,7 @@ import (
         "log"
         //    "k8s.io/client-go/tools/clientcmd"
         "path/filepath"
-        ////    apiv1 "k8s.io/api/core/v1"
+        //    apiv1 "k8s.io/api/core/v1"
         //    "k8s.io/client-go/kubernetes"
         "os"
         //      "k8s.io/apimachinery/pkg/util/runtime"
