@@ -18,7 +18,7 @@
 -   kubectl apply -f deploy/crds/harshit.example.com_v1alpha1_harshit_cr.yaml (now use the custom CR with custom variables, which will supplied to ansible as extra vars)
 
 # Test operator 
-- already pushed to docker hub
+- Already pushed to docker hub
    `https://hub.docker.com/repository/docker/hmharsh3/operatorharshit`
 
 
