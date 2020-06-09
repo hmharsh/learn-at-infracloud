@@ -17,6 +17,9 @@
 -   sed -i 's|REPLACE_IMAGE|hmharsh3/myoperator:1|g' deploy/operator.yaml     (update the image name operator descriptor to create background deployment crrosponding to the operator)
 -   kubectl apply -f deploy/crds/harshit.example.com_v1alpha1_harshit_cr.yaml (now use the custom CR with custom variables, which will supplied to ansible as extra vars)
 
+# Test operator 
+- already pushed to docker hub
+   `https://hub.docker.com/repository/docker/hmharsh3/operatorharshit`
 
 
 - reference: https://sdk.operatorframework.io/docs/ansible/quickstart/
