@@ -49,3 +49,21 @@ func onAdd(obj interface{}) {
         event := obj.(*corev1.Event)
         fmt.Println(event.InvolvedObject.Kind, "kind of event fired of type", event.Type)
 }
+
+
+
+/*
+ref: 
+https://godoc.org/k8s.io/api/core/v1#Event
+https://www.bluematador.com/blog/kubernetes-events-explained
+https://godoc.org/k8s.io/client-go/tools/cache#MetaNamespaceKeyFunc
+
+output snip:
+
+ReplicaSet kind of event fired of type Normal
+default/nginx.1616d0115441705b
+Deployment kind of event fired of type Normal
+default/nginx.1616d0a79e82aca6
+Deployment kind of event fired of type Normal
+
+*/
