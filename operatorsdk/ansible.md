@@ -22,4 +22,5 @@
    `https://hub.docker.com/repository/docker/hmharsh3/operatorharshit`
 
 
-- reference: https://sdk.operatorframework.io/docs/ansible/quickstart/
+# reference: 
+`https://sdk.operatorframework.io/docs/ansible/quickstart/`
