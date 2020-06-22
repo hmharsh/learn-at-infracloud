@@ -1,3 +1,5 @@
 https://github.com/hossainemruz/k8s-client-go-practice/blob/56eeb12f1ce54d3fe4d428e7546d70cd5bde3b50/main.go
 crud  https://github.com/kubernetes/client-go/blob/master/examples/create-update-delete-deployment/main.go
 https://github.com/vladimirvivien/k8s-client-examples/blob/master/go/pvcwatch-ctl/main.go
+
+K8 yaml to GO converter: https://github.com/PrasadG193/kyaml2go?utm_sq=gf81jgthvt, https://kyaml2go.prasadg.dev/
