@@ -1,0 +1,35 @@
+# Useful ones
+git reset --soft Head~3
+git commit
+git push origin <branch_name> --force
+
+# To Cover
+branching
+squash
+rebasing
+https://learngitbranching.js.org/
+https://try.github.io/
+
+# Relative reference
+- Moving upwards one commit at a time with ^
+- Moving upwards a number of times with ~<num>
+: master^^ is the grandparent (second-generation ancestor) of master
+: git checkout HEAD^ (head must be capital)
+: git checkout HEAD~3
+
+
+# Assigning branch to a commit
+git branch -f master commit_hash
+git branch -f master HEAD~3 -> moves (by force) the master branch to three parents behind HEAD.
+
+# Reset changes
+2 ways
+git reset  (to go back on local machine)
+git revert (to go back on remote)
+
+# cherry-pick
+git cherry-pick c3 c4 c7 
+pick this specific commits from their branch appent ahead of head
+
+# Interactive rebasing 
+"situation where you don't know what commits you want?"
