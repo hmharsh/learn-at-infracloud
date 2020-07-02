@@ -1,3 +1,3 @@
-Doc Reference:
- https://pkg.go.dev/ or godoc.org
- tutorial in deep: https://github.com/shijuvar/gokit
+- Doc Reference: https://pkg.go.dev/ or godoc.org
+- Tutorial in deep: https://github.com/shijuvar/gokit 
+- Context: https://github.com/campoy/justforfunc/tree/master/09-context and https://www.youtube.com/watch?v=LSzR0VEraWw
