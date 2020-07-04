@@ -16,6 +16,17 @@ https://try.github.io/
 : master^^ is the grandparent (second-generation ancestor) of master
 : git checkout HEAD^ (head must be capital)
 : git checkout HEAD~3
+: git rev-list --all 
+// 'rev-list --all' list all commit hash in order like
+```
+afc035ae81e738390db421c9744c27a407555067
+ce456d017cd8ea910cefd7ffed9db410481a28ff
+76972db8274d8ca5b1ec31a116a1fb6165f2d3d3
+```
+where 
+76.. is the 1st initial commit and afc.. is the most resent commit
+
+
 
 
 # Assigning branch to a commit
