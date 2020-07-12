@@ -46,3 +46,9 @@ pick this specific commits from their branch appent ahead of head
 Interactive rebasing : "situation where you don't know what commits you want?"
 https://stackoverflow.com/questions/7929369/how-to-rebase-local-branch-with-remote-master
 https://benmarshall.me/git-rebase/
+
+# Make small changes in any only commit
+git add <my fixed files>
+git commit --fixup=OLDCOMMIT
+git rebase --interactive --autosquash OLDCOMMIT^
+(where OLDCOMMIT is a commit id)
