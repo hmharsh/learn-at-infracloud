@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<script src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+<body>
+  
+<div id="mydiv"></div>
+<div id="root"></div>
+
+<script type="text/babel">
+//    class car {
+//        constructor(name){
+//            this.brand = name
+//        }
+//        info(){
+//            return ("My car's brand is:" + this.brand)
+//        }
+//    }
+//    class automobile extends car {
+//        constructor(name,type){
+//            super(name)
+//            this.type = type
+//        }
+//        info(){
+//            return (" I have a: "+ this.type +"\n It's brand is:" + this.brand)
+//        }
+
+//    }
+//    var auto = new automobile("NIOS", "CARR")
+//    var x = auto.info()
+//    console.log(x)
+   
+
+   // Way 1: Assign some value to html element
+    ReactDOM.render(<h1>Hello, world</h1>,document.getElementById('mydiv'));
+
+   // Way 2: create custom tag and use it
+    class Hello extends React.Component {
+      render() {
+        return <h1>Hello {this.props.name}, {this.props.surname}</h1>
+      }
+    }
+    class Test extends React.Component {
+      render() {
+        return <h1>Test</h1>
+      }
+    }
+    ReactDOM.render(<div><Hello name="harshit" surname="mahajan"/><br /><Test /></div>, document.getElementById('root'))
+</script>
+</body>
+</html>
+
