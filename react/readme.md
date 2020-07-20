@@ -3,3 +3,4 @@
 - componentDidMount :- call just after the render :- https://www.w3schools.com/react/react_lifecycle.asp
 - getSnapshotBeforeUpdate() // store previous state in variable named: prevState
 - shouldComponentUpdate() // return boolean 
+- event and event (https://www.w3schools.com/react/react_events.asp) bind (https://www.w3schools.com/react/showreact.asp?filename=demo2_react_events_this2)
