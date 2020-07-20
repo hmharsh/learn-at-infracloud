@@ -1,2 +1,3 @@
-https://www.w3schools.com/react/react_state.asp // comparision in props and state (setstate())
-getDerivedStateFromProps -> change state using props and much more, as it call just before render :- https://www.w3schools.com/react/react_lifecycle.asp
+- https://www.w3schools.com/react/react_state.asp // comparision in props and state (setstate())
+- getDerivedStateFromProps -> change state using props and much more, as it call just before render :- https://www.w3schools.com/react/react_lifecycle.asp
+- componentDidMount :- call just after the render :- https://www.w3schools.com/react/react_lifecycle.asp
