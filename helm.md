@@ -26,5 +26,9 @@ Overrides specified with --set are persisted in a ConfigMap.
 Values that have been --set can be viewed for a given release with helm get values <release-name>. 
 Values that have been --set can be cleared by running helm upgrade with --reset-values specified.
 ```
-
+- helm upgrade // When a new version of a chart is released, **or** when you want to change the configuration of your release
+- helm upgrade -f new_values.yaml harshit-mariadb stable/mariadb // to update the configuration values
+- helm get // command is a useful tool for looking at a release in the cluster.
+- helm rollback harshit-mariadb 1 // helm rollback [RELEASE] [REVISION], get this revision value from helm history
+- helm history harshit-mariadb
 
