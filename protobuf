@@ -1,0 +1,11 @@
+https://www.youtube.com/watch?v=46O73On0gyI
+protoc: compiler for protobuf 
+https://github.com/protocolbuffers/protobuf/releases
+-- For JS --
+// download, extract the protoc compiles (in bin directort there will be a protoc binary)
+input file: ./employees.proto
+protoc --js_out=import_style=commonjs,binary:. employees.proto
+output file: ./employees_pb.js
+
+Install google-protobuf (npm)
+
