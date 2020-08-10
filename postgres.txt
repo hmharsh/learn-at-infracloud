@@ -22,3 +22,6 @@ postgres=# SELECT column_name FROM information_schema.columns WHERE TABLE_NAME =
 
 # Metadata about all tables 
 postgres=# SELECT * FROM pg_catalog.pg_tables;
+
+# COUNT rows
+SELECT COUNT(*) FROM clusters;
