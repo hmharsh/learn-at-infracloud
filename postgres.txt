@@ -1,8 +1,11 @@
+# connect to postgres cli 
 su - postgres
 psql 
 
+# List DB
+\l
 
-List tables
+# List tables
 /dt or
 ```
 SELECT table_name
@@ -10,3 +13,12 @@ FROM information_schema.tables
 WHERE table_schema = 'public'
 ORDER BY table_name;
 ```
+
+# Get all columns
+postgres=# SELECT column_name FROM information_schema.columns WHERE TABLE_NAME = 'tenants';
+ 
+ SELECT cluster_name FROM clusters;
+ SELECT * FROM clusters;
+
+# Metadata about all tables 
+postgres=# SELECT * FROM pg_catalog.pg_tables;
