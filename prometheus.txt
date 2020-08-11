@@ -316,3 +316,27 @@ $ curl -X POST http://127.0.0.1:9090/-/reload
 https://github.com/linuxacademy/content-kubernetes-prometheus-app
 all steps of instrumention (connecting with node.js app will grafana): https://www.youtube.com/watch?time_continue=642&v=m2zM3zOZl34&feature=emb_logo
 doc of prom-client npm library: https://github.com/siimon/prom-client
+
+
+# Useful commands
+
+CREATE TABLE clusters (
+	org_name VARCHAR ( 50 ) UNIQUE NOT NULL
+);
+
+CREATE TABLE tenants (
+	org_name VARCHAR ( 50 ) UNIQUE NOT NULL
+);
+
+INSERT INTO clusters(org_name) VALUES ('harshit-123'); 
+
+
+ALTER TABLE tenants 
+ADD COLUMN hash VARCHAR NOT NULL;
+
+INSERT INTO tenants (org_name, hash) SELECT org_name, md5(org_name) FROM clusters;
+
+
+UPDATE clusters
+SET org_name = 'hh'
+WHERE org_name = 'harshit-123';
