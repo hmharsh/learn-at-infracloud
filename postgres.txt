@@ -25,3 +25,36 @@ postgres=# SELECT * FROM pg_catalog.pg_tables;
 
 # COUNT rows
 SELECT COUNT(*) FROM clusters;
+
+
+# Get table schema
+select column_name, data_type, character_maximum_length
+ from INFORMATION_SCHEMA.COLUMNS where table_name ='tenants';
+   or 
+\d tenants
+
+
+# query in jsonb datastructure 
+SELECT health FROM tenants WHERE health->>'status'='RUNNING';	
+
+
+# Filter by existence of specific key(s) exist in jsonb
+select * from clusters where version ?| array['armorblox'];
+  
+# Filter our key in jsonb colum
+SELECT version - 'kubernetes'  FROM clusters;
+ 
+ 
+ 
+ CREATE TABLE Orders (
+    org_name VARCHAR (60) NOT NULL,
+    OrderDate date DEFAULT now()
+);
+
+
+# Common
+ALTER TABLE tenants 
+ADD COLUMN hash VARCHAR NOT NULL;
+
+INSERT INTO tenants (org_name, hash) SELECT org_name, md5(org_name) FROM clusters;
+ 
