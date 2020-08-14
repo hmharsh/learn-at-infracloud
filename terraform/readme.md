@@ -1,5 +1,7 @@
 # Terraform 
 ## Hashicorp configuration language
+
+main.tf
 ```
 provider "aws" {
 access_key = ""
