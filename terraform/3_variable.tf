@@ -1,3 +1,4 @@
+# declared variable can also be supplied by, terraform apply -var 'name=harshit'
 variable "name" {
   type = string
   default = "harshit mahajan"  // will not ask for value of default is there at time of terraform apply 
