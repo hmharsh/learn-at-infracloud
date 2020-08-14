@@ -1,4 +1,4 @@
-
+# Provisioner
 // Provisioners can be used to model specific actions on the local machine or on a remote machine in order to prepare servers or other infrastructure objects for service.
 
 # If depends_on not used than all resource will run in parallel
@@ -16,7 +16,7 @@ resource "null_resource" "second" {
 }
 
 resource "null_resource" "third" {
-    depends_on = ["null_resource.second"]
+    depends_on = ["null_resource.second"]    # self keyword can also be used to access variables of it's own resource eg self.public_ip
     provisioner "local-exec" {
         command = "echo 'third'"
     }
