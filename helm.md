@@ -1,3 +1,8 @@
+## To do
+- helm lint
+- helm charemeusium lib
+- helm dependencies
+
 ## Start
 - install HELM from instructions listed in Doc
 
