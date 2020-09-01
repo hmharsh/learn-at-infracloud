@@ -90,5 +90,5 @@ helm dep update ./somechart // installing the dependencies as listed in requirem
 # NOTES
   - '--set' values merged into --values
   - Values that have been --set can be viewed for a given release with helm get values <release-name>
-   Values that have been --set can be cleared by running helm upgrade with --reset-values specified.
+  - Values that have been --set can be cleared by running helm upgrade with --reset-values specified.
 
