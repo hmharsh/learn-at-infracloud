@@ -1,5 +1,5 @@
 kubectl cluster-info dump
-
+https://github.com/ahmetb/kubectx
 # Namespace management
 ```
 $ kubectl create –f namespace.yml 
