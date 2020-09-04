@@ -1,3 +1,5 @@
+kubectl cluster-info dump
+
 # Namespace management
 ```
 $ kubectl create –f namespace.yml 
