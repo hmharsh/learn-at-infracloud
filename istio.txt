@@ -1,0 +1,26 @@
+Refer for basic usage: https://www.youtube.com/watch?v=wdusXMYeddg
+
+
+// Download istioctl binary
+curl -L https://github.com/istio/istio/releases/download/1.6.8/istioctl-1.6.8-linux-amd64.tar.gz | tar xvz && mv istioctl /usr/bin/istioctl && chmod +x /usr/bin/istioctl
+
+# For using sidecar across single k8s cluster
+  // Use istioctl binary to install and configure istio
+  istioctl verify-install  (or in version 1.6.8 use istioctl experimental precheck)
+  istioctl profile list
+  istioctl manifest generate --set profile=demo > /tmp/installation.yaml
+  istioctl manifest apply --set profile=demo
+  istioctl verify-install -f /tmp/installation.yaml
+  istioctl dashboard // show all available dashboard list in help
+  istioctl delete -f /tmp/installation.yaml
+
+  // To enable sidecar container with pods in default ns
+  kubectl label namespace default istio-injection=enabled (All new containers will have sidecar, existing pods need to be existing 1st to force recreation)
+  kubectl delete pod -l app=sleep // to delete the lable, to disable sidecar injection
+  
+  
+# Multi cluster POC:
+Document on google drive: https://drive.google.com/drive/u/0/folders/1rm7azcT2f9Sr1pCZJJh7avmdathmx94I
+
+
+
