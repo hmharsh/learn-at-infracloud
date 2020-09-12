@@ -1430,3 +1430,7 @@ spec:
 # customize the kubectl output using jsonpath
 kubectl get pods -o=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.startTime}{"\n"}{end}'
 ref: https://kubernetes.io/docs/reference/kubectl/jsonpath/
+
+
+# Backup and restore guide
+https://github.com/mmumshad/kubernetes-the-hard-way/blob/master/practice-questions-answers/cluster-maintenance/backup-etcd/etcd-backup-and-restore.md
