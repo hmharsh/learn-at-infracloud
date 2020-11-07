@@ -2,9 +2,6 @@
 GitHub Repo to store all Notes for the tools and technologies learnet during Initial days of infracloud 
 This majorly covers personal notes related to some concepts/tasks golang, docker, kubernetes, prometheus, grafana etc.
 
-##### Table of Contents 
-
-[Docker-Instalation](#Docker-Instalation)
 
 # Cluster Installation (Ubuntu)
 ### WSL
